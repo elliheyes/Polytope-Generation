@@ -32,10 +32,10 @@ struct population * evolvepop(struct population initialpop, int numgen, int meth
   for (gen=0; gen<numgen-1; gen++) {
     nextpop(evol[gen],&(evol[gen+1]),meth,numcuts,keepfitest,mutrate,alpha);  /* determine next generation */
     nterm=nterm+evol[gen+1].nterm;  /* count number of terminal states */
-    if (monitor) monitorevol(gen+1,&(evol[gen+1]));  /* monitor */
+    if (monitor) monitorevol(gen+1,&(evol[gen+1]));  /* monitor */ 
   }
 
-  if (monitor) printf("\nno. of terminal states: %i\n",nterm);
+  if (monitor) printf("\nNumber of terminal states: %i\n",nterm);
   
   return evol;
 }  
@@ -54,11 +54,14 @@ struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
 {
   int i,j, k;
   struct bitlist *bl;
-
-  /* find number of terminal states */
+  
+  /* find the number of terminal states */
   *numterm=0;
   for (k=0; k<numgen; k++)
-    for (i=0; i<evol[k].size; i++) if ((evol[k].bl)[i].terminal) (*numterm)++;
+    for (i=0; i<evol[k].size; i++) 
+      if ((evol[k].bl)[i].terminal){
+        (*numterm)++;
+      }
  
    /* allocate memory for terminal states */
   bl = calloc(*numterm,sizeof(struct bitlist)); 
@@ -66,15 +69,16 @@ struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
   /* store terminal states in allocated space */
   j=0;
   for (k=0; k<numgen; k++)
-    for (i=0; i<evol[k].size; i++) if ((evol[k].bl)[i].terminal) {
-	bl[j]=(evol[k].bl)[i]; j++;
+    for (i=0; i<evol[k].size; i++) 
+      if ((evol[k].bl)[i].terminal){
+	    bl[j]=(evol[k].bl)[i]; j++;
       }
 				 
    return bl;
 }
 
 
-/* remove redundqncy in list of bitlists */
+/* remove equality redundancy in list of bitlists */
 void removeredundancy(struct bitlist *bl, int *len)
 {
   int cnonred, cactive, red, k; 
@@ -84,12 +88,13 @@ void removeredundancy(struct bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-	if (bitlistsequal(bl[k],bl[cactive])) red=1;
+	    if (bitlistsequal(bl[k],bl[cactive])) red=1;
         k++;
       }
       if (!red) {
-	bl[cnonred]=bl[cactive];
-	cnonred++;}
+	    bl[cnonred]=bl[cactive];
+	    cnonred++;
+	  }
       cactive++;
     }
     *len=cnonred;
@@ -104,8 +109,9 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
   struct bitlist *bl;
 
   bl=termstates(evol,numgen,numterm);
+  
   removeredundancy(bl,numterm);
-
+  
   return bl;
 }  
 
@@ -120,7 +126,7 @@ struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int n
 
   /* main loop over evolutions */
   nterm=0;
-  for (cevol=0; cevol<numevol; cevol++) {
+  for (cevol=0; cevol<numevol; cevol++){
     
     /* evolve random population */
     evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
