@@ -22,30 +22,45 @@
 
 
 #define MIN -3			  /* lower bound on integers considered for points */
-#define NPTS 6		      /* number of points */
+#define NPTS 7  	      /* maximum number of points */
 #define POLYDIM 2		  /* dimension of polytopes */
 #define BINLEN 3		  /* maximum length of binary number */
 #define POPSIZE 100       /* population size */
 #define NUMGEN 100        /* number of generations */
-#define NUMCUTS 5         /* number of cuts in a crossing */
+#define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
-#define STDMUTRATE 0.01   /* standard mutation rate of 1% */
-#define STDALPHA 3.0      /* standard value of alpha parameter in selection probability */
-#define STDNUMCUTS 1      /* standard value for the number of cuts at crossing */
+#define MUTRATE 0.005     /* mutation rate */
+#define ALPHA 3.0         /* value of alpha parameter in selection probability */
 #define KEEPFITEST 1      /* copy fitest individual into next population */
 #define DONTKEEPFITEST 0  /* don't copy over fitest individual */
 #define MONITORON 1       /* terminal monitor on */
 #define MONITOROFF 0      /* terminal monitor off */
 
+/* fitness weights */
+#define INTERIOR_WEIGHT 1 
+#define DIST_WEIGHT 1 
+#define IP_WEIGHT 1 
+#define NVERTS_WEIGHT 0
+#define NVERTS 5
+#define H11_WEIGHT 0
+#define H11 1
+#define H12_WEIGHT 0
+#define H12 1
+#define H13_WEIGHT 0
+#define H13 1
+#define H22_WEIGHT 0
+#define H22 1
+#define EULER_WEIGHT 0
+#define EULER 1
 
-#define POLY_Dmax	6	           /* maximum dimension of polytope */
+
 #define POINT_Nmax 2000000         /* maximum number of points */
-#define VERT_Nmax 64	           /* maximum number of vertices */
+#define VERT_Nmax 128	           /* maximum number of vertices */
 #define FACE_Nmax 10000	           /* maximum number of faces */
 #define SYM_Nmax 46080             /* maximum number of symmetries */
 #define EQUA_Nmax VERT_Nmax        /* maximum number of facets */		
-#define AMBI_Dmax (5 * POLY_Dmax)  /* maximum dimension of the ambient space */
+#define AMBI_Dmax (5 * POLYDIM)    /* maximum dimension of the ambient space */
 
 #define FIB_Nmax 3000 /* maximum number of allowed weight relations among points that define the IP simplices */
 
@@ -128,6 +143,7 @@ struct binary
 
 struct pointlist
 {
+  int len;                    /* the number of points */
   int points[NPTS][POLYDIM];  /* the actual point list */
 };
 
@@ -148,7 +164,7 @@ struct population
   struct bitlist bl[POPSIZE];  /* the actual population */
 };  
 
-typedef struct {int n, np; Long x[POINT_Nmax][POLY_Dmax];} PolyPointList;
+typedef struct {int n, np; Long x[POINT_Nmax][POLYDIM];} PolyPointList;
 /*
 A list of lattice points of a polytope.
 P.x[i][j] is the j'th coordinate of the i'th lattice point.
@@ -162,12 +178,12 @@ The j'th coordinate of the i'th vertex is then given by P.x[V.v[i]][j].
 V.nv is the number of vertices of P.
 */
 
-typedef struct {Long a[POLY_Dmax], c;} Equation;
+typedef struct {Long a[POLYDIM], c;} Equation;
 /*
 An equation of the type ax+c=0
 */
 
-typedef struct {int ne; Equation e[EQUA_Nmax];}		     EqList;
+typedef struct {int ne; Equation e[EQUA_Nmax];} EqList;
 /*
 A list of equations. EL.ne is the number of equations in the list.
 */
@@ -177,9 +193,42 @@ typedef Long PairMat[EQUA_Nmax][VERT_Nmax];
 The matrix whose entries are the pairings av+c between the vertices v and the equations (a,c).
 */
 
+typedef struct {int mp, mv, np, nv, n, pic, cor, h22, h1[POLYDIM-1];} BaHo;                                                                    BaHo;
+/*
+This structure is related to Batyrev's formulas for Hodge numbers.
+n     ... dimension of the polytope
+pic   ... Picard number
+cor   ... sum of correction terms
+h1[i] ... Hodge number h_{1i}
+h22   ... Hodge number h_{22} (if n = 5)
+mp, mv, np, nv denote the numbers of points/vertices in the M and N lattices,
+repectively.
+*/
+
+typedef struct {
+    int nf[POLYDIM+1];			                /* #(faces)[dim]  */
+ 	INCI v[POLYDIM+1][FACE_Nmax]; 		        /*  vertex info   */
+ 	INCI f[POLYDIM+1][FACE_Nmax]; 		        /* V-on-dual info */
+ 	Long nip[POLYDIM+1][FACE_Nmax];		        /* #IPs on face  */
+ 	Long dip[POLYDIM+1][FACE_Nmax];} 	FaceInfo;   /* #IPs on dual  */
+/*
+nf[i] denotes the number of faces of dimension i
+   (the number of faces of dimension n-i-1 of the dual polytope).
+v[i][j] encodes the incidence relation of the j'th dim-i face with the vertices
+nip[i][j] is the number of interior points of the j'th dim-i face.
+f[i][j] and dip[i][j] give the same informations for the dual (n-i-1
+   dimensional) faces, with f[i][j] referring to the dual vertices.
+*/
+
+typedef	struct 	{int p[SYM_Nmax][VERT_Nmax];}		VPermList;
+/*
+The vertex permutation list.
+*/
+
 
 
 /*  ============              B I T L I S T                ============  */
+
 
 
 /* convert a decimal number into a binary list */
@@ -202,6 +251,9 @@ int randomint(int min, int max);
 
 /* generate a random choice for integers 0,...,len-1 for a probability distribution p */
 int randomchoice(float p[POPSIZE], int len);
+
+/* write a bitlist bl to a file with file pointer fp */
+void fprintbitlist(FILE *fp, struct bitlist bl);
 
 /* flips bit in position pos for a bitlist bl */
 void flipbit(struct bitlist *bl, int pos);
@@ -226,11 +278,14 @@ int compbitlist(const void *p1, const void *p2);
 
 /* decide if two bistlist are identical */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
-  
+
+/* decide if two bistlist are identical */
+int bitlistsequal2(struct bitlist bl1, struct bitlist bl2);
   
   
   
 /*  ============              P O P U L A T I O N                ============  */
+
 
 
 /* generate a random population of size popsize */
@@ -257,8 +312,8 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
 
 
 
-
 /*  ============              E V O L U T I O N                ============  */
+
 
 
 /* genetically evolve a population */
@@ -283,8 +338,8 @@ struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int n
 
 
 
-
 /*  ============             F I T N E S S               ============  */
+
 
 
 /* the fitness function which returns the fitness of a bitlist */
@@ -292,9 +347,14 @@ void fitness(struct bitlist * bl);
 
 
 
-
 /*  ============             V E R T E X                ============  */
 
+
+
+void Sort_VL(VertexNumList *V);
+/*
+Sorts the entries _V->v[i] in ascending order.
+*/
 
 Long Eval_Eq_on_V(Equation *E, Long *V, int n);
 /*
@@ -320,11 +380,10 @@ Calculates the matrix of pairings between the vertices in VNL and the
 equations in EL.
 */
 
-int EL_to_PPL(EqList *EL, PolyPointList *DP, int *n);
+void EL_to_PPL(EqList *EL, PolyPointList *DP, int *n);
 /*
 Converts *EL to the incomplete PolyPointList *DP corresponding to the dual
-polytope; *n is the dimension. Returns 1 if all equations of *EL are at
-distance 1 from the origin and 0 otherwise.
+polytope; *n is the dimension. 
 */
 
 int  Find_Equations(PolyPointList *P, VertexNumList *VNL, EqList *EL);
@@ -336,31 +395,45 @@ Find_Equations returns 1 if P has IP property (i.e., it has the
 origin in its interior) and 0 otherwise.
 */
 
-void Complete_Poly(Long VPM[][VERT_Nmax],EqList *E,int nv,PolyPointList *P);
+void Complete_Poly(Long VPM[][VERT_Nmax],EqList *E,int nv,PolyPointList *P, VertexNumList *_V);
 /*
 Given the vertex pairing matrix VPM, the EqList *E and the number nv of
 vertices, the complete list of lattice points *P is determined.
 */
 
+INCI Eq_To_INCI(Equation *E, PolyPointList *P, VertexNumList *VNL);
+/*
+Converts *E to an INCI.
+*/
+
+void Make_Incidence(PolyPointList *P, VertexNumList *VNL, EqList *EL,
+                    FaceInfo *FI);
+/*
+Creates the structure FaceInfo *FI from *P, *VNL and *EL.
+*/
+
+int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI);
+/*
+Fast computation of FaceInfo and Hodge numbers.
+*/
+
+/*  ============             N O R M A L   F O R M                ============  */
 
 
 
+void swap(int *i,int *j);
+/*
+Swaps *i and *j.
+*/
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+int  Make_Poly_Sym_NF(PolyPointList *P, VertexNumList *VNL, EqList *EL,
+		      int *SymNum, int V_perm[][VERT_Nmax], Long NF[POLYDIM][VERT_Nmax]);
+/*
+Given *P, *VNL and *EL, the following objects are determined:
+the number *SymNum of GL(n,Z)-symmetries of the polytope,
+the *SymNum vertex permutations V_perm realising these symmetries,
+the normal form coordinates NF of the vertices,
+the number of symmetries of the vertex pairing matrix
+    (this number is the return value of Make_Poly_Sym_NF).
+*/
 
