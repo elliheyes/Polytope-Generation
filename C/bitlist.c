@@ -7,6 +7,15 @@
 #include <math.h>
 #include "Global.h"
 
+/* compare two arrays */
+char compareArray(int a[],int b[],int size){
+	int i;
+	for(i=0;i<size;i++){
+		if(a[i]!=b[i])
+			return 1;
+	}
+	return 0;
+}
 
 /* convert decimal into binary */
 struct binary decimal2binary(int num)
@@ -65,7 +74,7 @@ struct bitlist pts2bts(struct pointlist pl)
     
   bl.len = NPTS*POLYDIM*BINLEN;
 
-  for(i=0; i < NPTS; i++){
+  for(i=0; i < pl.len; i++){
     for(j=0; j < POLYDIM; j++){
       num = pl.points[i][j];
       bin = decimal2binary(num - MIN);
@@ -76,28 +85,41 @@ struct bitlist pts2bts(struct pointlist pl)
   }
   
   fitness(blp);
-  if(bl.fitness == 1) bl.terminal = 1;
-  else bl.terminal = 0;
-    
+  
   return bl;
 }
 
 
-/* convert a bit list into a points list and subtract max */
+/* convert a bit list into a reduced points list and subtract max */
 struct pointlist bts2pts(struct bitlist bl)
 {
   struct pointlist pl;
   int i,j,k;
+  int count=0;
+  int new;
+  int point[POLYDIM];
   struct binary bin;
   
-    for(i=0; i < NPTS; i++){
-      for(j=0; j < POLYDIM; j++){
-        for(k=0; k < BINLEN; k++){
-          bin.list[k] = bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k];
-        }
-        pl.points[i][j] = binaryToDecimal(bin) + MIN;
+  for(i=0; i<NPTS; i++){
+    
+    for(j=0; j<POLYDIM; j++){
+      for(k=0; k<BINLEN; k++){
+        bin.list[k] = bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k];
       }
+      point[j] = binaryToDecimal(bin) + MIN;  
     }
+    
+    /* check if new point already exists in the list */
+    new=1;
+    for(j=0; j<count; j++) if(!compareArray(point, pl.points[j], POLYDIM)) new=0;
+    
+    if(new){
+      for(j=0; j<POLYDIM; j++) pl.points[count][j] = point[j]; 
+      count++;
+    }
+    
+  }
+  pl.len = count;
   
   return pl;
 }
@@ -122,6 +144,7 @@ struct bitlist randomstate()
   	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   	}
   }
+  pl.len = NPTS;
   
   bl = pts2bts(pl);
   
@@ -265,21 +288,107 @@ int compbitlist(const void *p1, const void *p2)
 }  
 
 
-/* decide if two bistlist are identical */
+/* decide if two bistlist are equivalent by comparing their normal forms */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
 {
-  int i, equal;
+  int i, j, equal;
+  struct pointlist pl1, pl2;
+  VertexNumList V01, V02;
+  EqList *E01 = (EqList *) malloc(sizeof(EqList)),
+         *E02 = (EqList *) malloc(sizeof(EqList));
+  PolyPointList *_P01 = (PolyPointList *) malloc(sizeof(PolyPointList)),
+   				*_P02 = (PolyPointList *) malloc(sizeof(PolyPointList));
+  PairMat *PM01 = (PairMat *) malloc(sizeof(PairMat)),
+  		  *PM02 = (PairMat *) malloc(sizeof(PairMat));
+  int IP1, IP2;
+  int SymNum1, SymNum2;
+  int VPMSymNum1, VPMSymNum2;
+  VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
+  VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
+  Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
   
-  if (bl1.len != bl2.len) return 0;
-  else {
-    equal=1; i=0;
-    while (equal && i<bl1.len) {
-      equal = equal && (bl1.bits[i]==bl2.bits[i]);
-      i++;
+  /* transform the bitlists into point lists */
+  pl1 = bts2pts(bl1);
+  pl2 = bts2pts(bl2);
+  
+  /* define the number polytope dimension */
+  _P01->n=POLYDIM; _P02->n=POLYDIM; 
+    
+  /* define the number of points */
+  _P01->np=pl1.len; _P02->np=pl2.len;
+    
+  /* define the points */
+  for(i=0; i<pl1.len; i++){
+    for(j=0; j<POLYDIM; j++){
+      _P01->x[i][j]=pl1.points[i][j];
     }
+  } 
+  for(i=0; i<pl2.len; i++){
+    for(j=0; j<POLYDIM; j++){
+      _P02->x[i][j]=pl2.points[i][j];
+    }
+  } 
+    
+  /* find the bounding hyperplane equations of the polytope */
+  IP1=Find_Equations(_P01,&V01,E01); 
+  IP2=Find_Equations(_P02,&V02,E02); 
+  
+  /* if the number of vertices don't match then return 0 */
+  if (V01.nv != V02.nv) return 0;
+  else {
+    /* find the vertex pairing matrices */
+  	Make_VEPM(_P01,&V01,E01,*PM01); 
+  	Make_VEPM(_P02,&V02,E02,*PM02); 
+  
+  	/* find the complete lists of points */
+  	Complete_Poly(*PM01,E01,V01.nv,_P01,&V01); 
+  	Complete_Poly(*PM02,E02,V02.nv,_P02,&V02); 
 
+    /* compute normal forms */
+	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
+    VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
+    
+   	/* compare the normal forms of the two polytopes */
+    equal=1; 
+    for(i=0; i<POLYDIM; i++) for(j=0; j<V01.nv; j++) equal = equal && (NF1[i][j]==NF2[i][j]);
     return equal;
   }
+  
+  free(E01);free(E02);free(_P01);free(_P02);free(PM01);free(PM02);free(VP01);free(VP02); 
+  
 }
 
+
+/* write bitlist to a file in the format of the list of vertices  */
+void fprintbitlist(FILE * fp, struct bitlist bl)
+{
+  int i,j,IP;
+  struct pointlist pl;
+  VertexNumList V;
+  EqList *E = (EqList *) malloc(sizeof(EqList));
+  PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
+  
+  pl = bts2pts(bl);
+  
+  _P->n=POLYDIM; 
+  _P->np=pl.len; 
+  
+  for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
+    
+  IP=Find_Equations(_P,&V,E); 
+  
+  fprintf(fp,"[");
+  for(i=0; i<V.nv; i++){
+    fprintf(fp,"[");
+    for(j=0; j<POLYDIM; j++){
+      fprintf(fp,"%lld",_P->x[V.v[i]][j]);
+      if(j!=POLYDIM-1) fprintf(fp,",");
+    }
+    fprintf(fp,"]");
+  }
+  fprintf(fp,"]\n");
+  
+  free(E);free(_P);
+  
+}
 
