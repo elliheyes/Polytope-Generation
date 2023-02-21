@@ -8,11 +8,25 @@
 
 int main (int narg, char* fn[]){
 
+  /* initialise the population */
   struct population initialpop = randompop(POPSIZE);
   
-  struct population * pop = evolvepop(initialpop, NUMGEN, ROULETTE, NUMCUTS, KEEPFITEST, STDMUTRATE, STDALPHA, MONITORON); 
+  /* evolve the population over generations */
+  struct population * evol = evolvepop(initialpop, NUMGEN, ROULETTE, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITORON); 
   
-  /* struct bitlist * blterm = searchenv(10, NUMGEN, POPSIZE, ROULETTE, NUMCUTS, KEEPFITEST, STDMUTRATE, STDALPHA, MONITORON); */
- 
+  /* extract reduced list of terminal states */
+  int n; 
+  struct bitlist *bl;
+  bl = termstatesred(evol, NUMGEN, &n);
+  printf("Number of reduced terminal states: %d\n",n);
+
+  /* write terminal states to a file */
+  FILE * fp = fopen("Terminal_States.txt","w");  
+  for(int i=0; i<n; i++) fprintbitlist(fp, bl[i]); 
+
   return 0;
 } 
+
+
+
+
