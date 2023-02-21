@@ -55,11 +55,12 @@ void mutatepop(struct population *pop, float mutrate)
     flipbit(&((pop->bl)[ipos]),bpos);	/* flip bit */
   }
   
-   for (k=0; k<pop->size; k++) fitness(&((pop->bl)[k])); /* update fitness for mutated population */
-   pop->avfitness=avfitness(pop);                        /* average fitness in mutated population */
-   blfitest=fitestinpop(pop);		                     /* fittest in population */
-   pop->maxfitness=blfitest.fitness;                     /* maximal fitness in mutated population */
-   pop->nterm=nterminalpop(pop);                         /* number of terminal state in mutated population */
+  for (k=0; k<pop->size; k++) fitness(&((pop->bl)[k])); /* update fitness for mutated population */
+  pop->avfitness=avfitness(pop);                        /* average fitness in mutated population */
+  blfitest=fitestinpop(pop);		                     /* fittest in population */
+  pop->maxfitness=blfitest.fitness;                     /* maximal fitness in mutated population */
+  pop->nterm=nterminalpop(pop);                         /* number of terminal state in mutated population */
+  
 }  
 
 
@@ -119,7 +120,8 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
 
    n=pop.size;             /* size of population */
    len=((pop.bl)[0]).len;  /* length of bitlist - assume the same across population */
-   if (n>1) {
+  
+   if (n>1){
 
      /* find fitest in population */
      blfitest=fitestinpop(&pop);
@@ -129,6 +131,7 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
     if (alpha<=1.) alpha=2.;
  
     /* compute selection probabilities p */
+    
     /* ranking method */
     if (meth==RANKING) {
       sortpop(&pop);
@@ -145,14 +148,25 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
 
     /* select and cross pairs of individuals */
     i=0;
-    while (i<n) {
-      i1=randomchoice(p,n); i2=randomchoice(p,n);             /* positions of two individuals selected */
-      bl1=pop.bl[i1]; bl2=pop.bl[i2];                         /* copy two selected individuals */
-      for (j=0; j<numcuts; j++) cutpos[j]=randomint(0,len-1); /* determine random cut positions */
-      crossbitlists(&bl1,&bl2,numcuts,cutpos);                /* cross the two individuals */
-      (newpop->bl)[i]=bl1; (newpop->bl)[i+1]=bl2;             /* copy the crossed individuals into new population */
+    while (i<n){
+	  /* select the positions of two individuals */
+      i1=randomchoice(p,n); i2=randomchoice(p,n);             
+      
+      /* copy the two selected individuals */
+      bl1=pop.bl[i1]; bl2=pop.bl[i2];                       
+      
+      /* determine the random cut positions */
+      for (j=0; j<numcuts; j++) cutpos[j]=randomint(0,len-1); 
+      
+      /* cross the two individuals */
+      crossbitlists(&bl1,&bl2,numcuts,cutpos);    
+      
+      /* copy the crossed individuals into the new population */
+      (newpop->bl)[i]=bl1; (newpop->bl)[i+1]=bl2;       
+           
       i=i+2;
     }
+    
     newpop->size=n;
 
     /* mutate new population */
@@ -160,6 +174,6 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
 
     /* if fitest individual is kept copy to new population */
     if (keepfitest) (newpop->bl)[0]=blfitest;
-
  }  
+ 
 } 
