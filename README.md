@@ -26,7 +26,7 @@ Notes:
     does not satisfy the interior point property.
 
   x NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
-    does not have NVERTS number of vertices. NVERTS is also defined in `Global.h`. This 
+    does not have NVERTS number of vertices. NVERTS is also defined in 'Global.h'. This 
     causes the genetic algorithm to generate polytopes of a given number of vertices.
     
   x H11_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope does
