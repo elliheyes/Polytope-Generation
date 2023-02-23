@@ -4,7 +4,6 @@
 /*  ==========						                            ==========  */
 /*  ======================================================================  */
 
-#include <math.h>
 #include "Global.h"
 
 /* compare two arrays */
@@ -72,7 +71,7 @@ struct bitlist pts2bts(struct pointlist pl)
   int num;
   struct binary bin;
     
-  bl.len = NPTS*POLYDIM*BINLEN;
+  bl.len = MAXPTS*POLYDIM*BINLEN;
 
   for(i=0; i < pl.len; i++){
     for(j=0; j < POLYDIM; j++){
@@ -100,7 +99,7 @@ struct pointlist bts2pts(struct bitlist bl)
   int point[POLYDIM];
   struct binary bin;
   
-  for(i=0; i<NPTS; i++){
+  for(i=0; i<MAXPTS; i++){
     
     for(j=0; j<POLYDIM; j++){
       for(k=0; k<BINLEN; k++){
@@ -139,12 +138,12 @@ struct bitlist randomstate()
   struct pointlist pl;
   int i,j;
   
-  for(i=0; i<NPTS; i++){
+  for(i=0; i<MAXPTS; i++){
   	for(j=0; j<POLYDIM; j++){
   	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   	}
   }
-  pl.len = NPTS;
+  pl.len = MAXPTS;
   
   bl = pts2bts(pl);
   
@@ -288,8 +287,25 @@ int compbitlist(const void *p1, const void *p2)
 }  
 
 
-/* decide if two bistlist are equivalent by comparing their normal forms */
+/* decide if two bistlist are identical */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
+{
+  int i, equal;
+  
+  if (bl1.len != bl2.len) return 0;
+  else {
+    equal=1; i=0;
+    while (equal && i<bl1.len) {
+      equal = equal && (bl1.bits[i]==bl2.bits[i]);
+      i++;
+    }
+    return equal;
+  } 
+}
+
+
+/* decide if two bistlist are equivalent by comparing their normal forms */
+int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
 {
   int i, j, equal;
   struct pointlist pl1, pl2;
@@ -298,14 +314,8 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
          *E02 = (EqList *) malloc(sizeof(EqList));
   PolyPointList *_P01 = (PolyPointList *) malloc(sizeof(PolyPointList)),
    				*_P02 = (PolyPointList *) malloc(sizeof(PolyPointList));
-  PairMat *PM01 = (PairMat *) malloc(sizeof(PairMat)),
-  		  *PM02 = (PairMat *) malloc(sizeof(PairMat));
   int IP1, IP2;
-  int SymNum1, SymNum2;
-  int VPMSymNum1, VPMSymNum2;
-  VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
-  VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
-  Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
+  
   
   /* transform the bitlists into point lists */
   pl1 = bts2pts(bl1);
@@ -333,17 +343,31 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
   IP1=Find_Equations(_P01,&V01,E01); 
   IP2=Find_Equations(_P02,&V02,E02); 
   
-  /* if the number of vertices don't match then return 0 */
-  if (V01.nv != V02.nv) return 0;
+  /* check if the number of vertices match */
+  if (V01.nv != V02.nv){
+     /* free allocated memory */
+  	 free(E01);free(E02);free(_P01);free(_P02);
+  
+     /* if the number of vertices don't match then return 0 */
+  	 return 0;
+  }
   else {
+  	int SymNum1, SymNum2;
+  	int VPMSymNum1, VPMSymNum2;
+  	PairMat *PM01 = (PairMat *) malloc(sizeof(PairMat)),
+  		  	*PM02 = (PairMat *) malloc(sizeof(PairMat));
+  	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
+  	VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
+  	Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
+  
     /* find the vertex pairing matrices */
   	Make_VEPM(_P01,&V01,E01,*PM01); 
   	Make_VEPM(_P02,&V02,E02,*PM02); 
   
   	/* find the complete lists of points */
-  	Complete_Poly(*PM01,E01,V01.nv,_P01,&V01); 
-  	Complete_Poly(*PM02,E02,V02.nv,_P02,&V02); 
-
+  	Complete_Poly(*PM01,E01,V01.nv,_P01); 
+  	Complete_Poly(*PM02,E02,V02.nv,_P02); 
+  
     /* compute normal forms */
 	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
     VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
@@ -351,10 +375,12 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
    	/* compare the normal forms of the two polytopes */
     equal=1; 
     for(i=0; i<POLYDIM; i++) for(j=0; j<V01.nv; j++) equal = equal && (NF1[i][j]==NF2[i][j]);
+    
+    /* free allocated memory */
+    free(E01);free(E02);free(_P01);free(_P02);free(PM01);free(PM02);free(VP01);free(VP02); 
+    
     return equal;
   }
-  
-  free(E01);free(E02);free(_P01);free(_P02);free(PM01);free(PM02);free(VP01);free(VP02); 
   
 }
 
@@ -391,4 +417,3 @@ void fprintbitlist(FILE * fp, struct bitlist bl)
   free(E);free(_P);
   
 }
-
