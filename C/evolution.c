@@ -78,7 +78,7 @@ struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
 }
 
 
-/* remove equality redundancy in list of bitlists */
+/* remove redundancy in list of bitlists */
 void removeredundancy(struct bitlist *bl, int *len)
 {
   int cnonred, cactive, red, k; 
@@ -88,7 +88,8 @@ void removeredundancy(struct bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-	    if (bitlistsequal(bl[k],bl[cactive])) red=1;
+        if (bitlistsequal(bl[k],bl[cactive])) red=1;
+        else if (bitlistsequiv(bl[k],bl[cactive])) red=1;
         k++;
       }
       if (!red) {
@@ -99,6 +100,7 @@ void removeredundancy(struct bitlist *bl, int *len)
     }
     *len=cnonred;
     qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
+    
   }
 }
 
@@ -108,8 +110,10 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
 {
   struct bitlist *bl;
 
+  /* extract terminal states */
   bl=termstates(evol,numgen,numterm);
   
+  /* remove redundancy in the list of terminal states */
   removeredundancy(bl,numterm);
   
   return bl;
@@ -118,7 +122,7 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
 
 /* repeated evolution of a random initial population, extracting terminal states */
 struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int numcuts,
-			   int keepfitest, float mutrate, float alpha, int monitor)
+			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm)
 {
   int cevol, n, i, nterm;
   struct population *evol;
@@ -168,8 +172,13 @@ struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int n
       printf("%6i    %6i    %6i\n",cevol,n,nterm);
     }
     
-    free(evol);
+    /* print to file */
+    fprintf(fp,"%d %d\n",n,nterm);
+    
+    free(bl);free(evol);
   }
+  
+  *numterm = nterm;
 
   return blterm; 
 }
