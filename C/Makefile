@@ -3,10 +3,14 @@
 SOURCES= Rat.c Vertex.c Polynf.c bitlist.c fitness.c population.c evolution.c
 OBJECTS= $(SOURCES:.c=.o)
 
+LIBS = -lm
+
+FLAGS = -g -O0
+
 CC=cc 
 
 gen_poly: gen_poly.o  $(OBJECTS)  Global.h
-	$(CC) -o  gen_poly.x  gen_poly.o  $(OBJECTS)
+	$(CC) $(FLAGS) -o  gen_poly.x  gen_poly.o  $(OBJECTS) $(LIBS)
 
 bitlist.o:      Global.h 
 fitness.o:      Global.h 
