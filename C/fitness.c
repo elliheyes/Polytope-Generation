@@ -6,67 +6,121 @@
 
 #include "Global.h"
 
+/* exchange two rows of a matrix */
+void swapRows(int R, int C, int mat[R][C], int row1, int row2, int col)
+{
+	int i;
+    for (i = 0; i < col; i++)
+    {
+        int temp = mat[row1][i];
+        mat[row1][i] = mat[row2][i];
+        mat[row2][i] = temp;
+    }
+}
+ 
+/* compute the rank of a matrix */
+int rankOfMatrix(int R, int C, int mat[R][C])
+{
+    int row, col, i, rank = C;
+ 
+    for (row = 0; row < rank; row++)
+    { 
+        if (mat[row][row])
+        {
+           for (col = 0; col < R; col++)
+           {
+               if (col != row)
+               {
+                 double mult = (double)mat[col][row] / mat[row][row];
+                 for (i = 0; i < rank; i++) mat[col][i] -= mult * mat[row][i];
+              }
+           }
+        }
+        else
+        {
+            int reduce = 1;
+ 
+            for (i = row + 1; i < R;  i++)
+            {
+                if (mat[i][row])
+                {
+                    swapRows(R, C, mat, row, i, rank);
+                    reduce = 0;
+                    break ;
+                }
+            }
+ 
+            if (reduce)
+            {
+                rank--;
+ 
+                for (i = 0; i < R; i ++)
+                    mat[i][row] = mat[i][rank];
+            }
+            row--;
+        }
+    }
+    return rank;
+}
+
+/* compute the dimension of a polytope from its pointlist */
+int dimensionOfPolytope(struct pointlist pl)
+{
+    int i, j, mat[pl.len][POLYDIM];
+    
+    for(i=0; i<pl.len; i++){
+        for(j=0; j<POLYDIM; j++){
+            mat[i][j] = pl.points[i][j]-pl.points[0][j];
+        }
+    }
+    
+    int dim = rankOfMatrix(pl.len, POLYDIM, mat);
+    
+    return dim;
+}
+
 /* compute the fitness of a polytope from its bitlist */
 void fitness(struct bitlist *bl)
 {
   float score;
-  int IP;
-  int i,j,k;
-  int range=pow(2,BINLEN)-1;
-  int interior;
-  float numInterior;
-  float totalDist, avDist;
-  int h11, h12, h13, h22, euler;
+  struct pointlist pl;
+  int dim;
   
   /* compute the list of points from the bitlist */
-  struct pointlist pl = bts2pts(*bl); 
-
-  if(pl.len < POLYDIM) score = -100;
+  pl = bts2pts(*bl); 
+  
+  /* compute the dimension of the polytope */
+  dim = dimensionOfPolytope(pl);
+  
+  /* if the dimension of the polytope is less than POLYDIM then assign a large penalty */
+  if(dim < POLYDIM) score = -10;
   else{
-    /* define the data objects */
-  	VertexNumList V;
-  	EqList *E = (EqList *) malloc(sizeof(EqList));
-  	PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
-  	PairMat *PM = (PairMat *) malloc(sizeof(PairMat));
-  	BaHo BH;
-  	FaceInfo *FI = (FaceInfo *) malloc(sizeof(FaceInfo));
+    int i, j, k, IP, interior, h11, h12, h13, h22, euler, range=pow(2,BINLEN)-1;
+  	float numInterior, totalDist, avDist;
+    VertexNumList V;
+    EqList *E = (EqList *) malloc(sizeof(EqList));
+    PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
+    PairMat *PM = (PairMat *) malloc(sizeof(PairMat));
+    BaHo BH;
+    FaceInfo *FI = (FaceInfo *) malloc(sizeof(FaceInfo));
   
-  	/* define the polytope dimension */
-  	_P->n=POLYDIM; 
+    /* define the polytope dimension */
+    _P->n=POLYDIM; 
   	
-  	/* define the number of points */
-  	_P->np=pl.len; 
+    /* define the number of points */
+    _P->np=pl.len; 
   
-  	/* define the points */
-  	for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
+    /* define the points */
+    for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
 
     /* find the bounding hyperplane equations of the polytope */
     IP=Find_Equations(_P,&V,E); 
-    
-    /* find the vertex pairing matrices */
-  	Make_VEPM(_P,&V,E,*PM); 
-
-  	/* find the complete lists of points */
-  	Complete_Poly(*PM,E,V.nv,_P,&V); 
   	
   	/* compute the fitness score */
   	score = 0;
   	
   	/* penalty for the IP property */
   	if(IP_WEIGHT>0) score += IP_WEIGHT*(IP-1);
-  	
-  	/* penalty for number of interior points */
-  	if(INTERIOR_WEIGHT>0){
-  		numInterior = 0.;
-  		for(i=0; i<_P->np; i++){
-  			interior = 1;
-  			for(j=0; j<E->ne; j++){
-  				if(Eval_Eq_on_V(&E->e[j],_P->x[i],_P->n) == 0) interior=0;
-  			}
-  			if(interior) numInterior++;
-  		}
-  		score += -INTERIOR_WEIGHT*abs(1-numInterior)/(range*POLYDIM);
-  	}
   	
   	/* penalty for the distance of facets from the origin */
   	if(DIST_WEIGHT>0){
@@ -79,8 +133,31 @@ void fitness(struct bitlist *bl)
 	/* penalty for the number of vertices */
 	if(NVERTS_WEIGHT>0) score += -NVERTS_WEIGHT*abs(V.nv-NVERTS);
 	
-	/* penalty for the hodge numbers */
-	if(H11_WEIGHT > 0 || H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0 || EULER_WEIGHT > 0){
+	if(NPTS_WEIGHT > 0 || INTERIOR_WEIGHT > 0 || H11_WEIGHT > 0 || 
+		H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0 || EULER_WEIGHT > 0){
+		/* find the vertex pairing matrices */
+  		Make_VEPM(_P,&V,E,*PM); 
+  	
+  		/* find the complete lists of points */
+  		Complete_Poly(*PM,E,V.nv,_P); 
+  		
+  		/* penalty for the number of points */
+		if(NPTS_WEIGHT>0) score += -NPTS_WEIGHT*abs(_P->np-NPTS);
+  		
+  		/* penalty for number of interior points */
+  		if(INTERIOR_WEIGHT>0){
+  			numInterior = 0.;
+  			for(i=0; i<_P->np; i++){
+  				interior = 1;
+  				for(j=0; j<E->ne; j++){
+  					if(Eval_Eq_on_V(&E->e[j],_P->x[i],_P->n) == 0) interior=0;
+  				}
+  				if(interior) numInterior++;
+  			}
+  			score += -INTERIOR_WEIGHT*abs(1-numInterior)/(range*POLYDIM);
+  		}
+	
+		/* penalties for topological data */
 		if(score == 0){
 			QuickAnalysis(_P, &BH, FI);
 			if(H11_WEIGHT > 0) score += -H11_WEIGHT*abs(BH.h1[1]-H11);
@@ -90,7 +167,6 @@ void fitness(struct bitlist *bl)
 			if(EULER_WEIGHT > 0) score += -EULER_WEIGHT*abs(6*(8+BH.h1[1]+BH.h1[3]-BH.h1[2])-EULER);
 		}
 	}
-  
     /* free allocated memory */
     free(E);free(_P);free(PM);free(FI);
   }
@@ -102,5 +178,3 @@ void fitness(struct bitlist *bl)
   else bl->terminal = 0;
 
 }
-
-
