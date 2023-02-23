@@ -21,12 +21,12 @@
 #define LLong long long
 
 
-#define MIN -3			  /* lower bound on integers considered for points */
-#define NPTS 7  	      /* maximum number of points */
-#define POLYDIM 2		  /* dimension of polytopes */
-#define BINLEN 3		  /* maximum length of binary number */
-#define POPSIZE 100       /* population size */
-#define NUMGEN 100        /* number of generations */
+#define MIN -10			  /* lower bound on integers considered for points */
+#define MAXNPTS 6  	      /* maximum number of vertices */
+#define POLYDIM 5		  /* dimension of polytopes */
+#define BINLEN 4		  /* maximum length of binary number */
+#define POPSIZE 200       /* population size */
+#define NUMGEN 200        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -38,11 +38,13 @@
 #define MONITOROFF 0      /* terminal monitor off */
 
 /* fitness weights */
-#define INTERIOR_WEIGHT 1 
 #define DIST_WEIGHT 1 
 #define IP_WEIGHT 1 
+#define INTERIOR_WEIGHT 0 /* if >0 slows down computation */
 #define NVERTS_WEIGHT 0
-#define NVERTS 5
+#define NVERTS 6
+#define NPTS_WEIGHT 0
+#define NPTS 7
 #define H11_WEIGHT 0
 #define H11 1
 #define H12_WEIGHT 0
@@ -144,13 +146,13 @@ struct binary
 struct pointlist
 {
   int len;                    /* the number of points */
-  int points[NPTS][POLYDIM];  /* the actual point list */
+  int points[MAXNPTS][POLYDIM];  /* the actual point list */
 };
 
 struct bitlist
 {
   int len;                        /* number of bits in bitlist */
-  int bits[NPTS*POLYDIM*BINLEN];  /* the actual bitlist */
+  int bits[MAXNPTS*POLYDIM*BINLEN];  /* the actual bitlist */
   float fitness;                  /* fitness of bitlist */
   int terminal;                   /* terminal or not */
 };
@@ -279,8 +281,8 @@ int compbitlist(const void *p1, const void *p2);
 /* decide if two bistlist are identical */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
 
-/* decide if two bistlist are identical */
-int bitlistsequal2(struct bitlist bl1, struct bitlist bl2);
+/* decide if two bistlist describe equivalent polytopes */
+int bitlistsequiv(struct bitlist bl1, struct bitlist bl2);
   
   
   
@@ -334,7 +336,7 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
 
 /* repeated evolution of a random initial population, extracting terminal states */
 struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int numcuts,
-			   int keepfitest, float mutrate, float alpha, int monitor);
+			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm);
 
 
 
@@ -395,7 +397,7 @@ Find_Equations returns 1 if P has IP property (i.e., it has the
 origin in its interior) and 0 otherwise.
 */
 
-void Complete_Poly(Long VPM[][VERT_Nmax],EqList *E,int nv,PolyPointList *P, VertexNumList *_V);
+void Complete_Poly(Long VPM[][VERT_Nmax],EqList *E,int nv,PolyPointList *P);
 /*
 Given the vertex pairing matrix VPM, the EqList *E and the number nv of
 vertices, the complete list of lattice points *P is determined.
@@ -436,4 +438,26 @@ the normal form coordinates NF of the vertices,
 the number of symmetries of the vertex pairing matrix
     (this number is the return value of Make_Poly_Sym_NF).
 */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
