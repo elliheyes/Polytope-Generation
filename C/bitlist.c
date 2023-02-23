@@ -71,7 +71,7 @@ struct bitlist pts2bts(struct pointlist pl)
   int num;
   struct binary bin;
     
-  bl.len = MAXPTS*POLYDIM*BINLEN;
+  bl.len = MAXNPTS*POLYDIM*BINLEN;
 
   for(i=0; i < pl.len; i++){
     for(j=0; j < POLYDIM; j++){
@@ -99,7 +99,7 @@ struct pointlist bts2pts(struct bitlist bl)
   int point[POLYDIM];
   struct binary bin;
   
-  for(i=0; i<MAXPTS; i++){
+  for(i=0; i<MAXNPTS; i++){
     
     for(j=0; j<POLYDIM; j++){
       for(k=0; k<BINLEN; k++){
@@ -138,12 +138,12 @@ struct bitlist randomstate()
   struct pointlist pl;
   int i,j;
   
-  for(i=0; i<MAXPTS; i++){
+  for(i=0; i<MAXNPTS; i++){
   	for(j=0; j<POLYDIM; j++){
   	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   	}
   }
-  pl.len = MAXPTS;
+  pl.len = MAXNPTS;
   
   bl = pts2bts(pl);
   
@@ -370,7 +370,7 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
   
     /* compute normal forms */
 	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
-    VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
+        VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
     
    	/* compare the normal forms of the two polytopes */
     equal=1; 
