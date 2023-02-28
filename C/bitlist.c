@@ -1,10 +1,10 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			   	          	==========  */
 /*  ==========         B I T L I S T   F U N C T I O N S        ==========  */
-/*  ==========						                            ==========  */
+/*  ==========						        ==========  */
 /*  ======================================================================  */
 
-#include "Global.h"
+#include "Global_5d_7p.h"
 
 /* compare two arrays */
 char compareArray(int a[],int b[],int size){
@@ -71,7 +71,7 @@ struct bitlist pts2bts(struct pointlist pl)
   int num;
   struct binary bin;
     
-  bl.len = MAXNPTS*POLYDIM*BINLEN;
+  bl.len = MAXNVRTS*POLYDIM*BINLEN;
 
   for(i=0; i < pl.len; i++){
     for(j=0; j < POLYDIM; j++){
@@ -99,7 +99,7 @@ struct pointlist bts2pts(struct bitlist bl)
   int point[POLYDIM];
   struct binary bin;
   
-  for(i=0; i<MAXNPTS; i++){
+  for(i=0; i<MAXNVRTS; i++){
     
     for(j=0; j<POLYDIM; j++){
       for(k=0; k<BINLEN; k++){
@@ -138,12 +138,13 @@ struct bitlist randomstate()
   struct pointlist pl;
   int i,j;
   
-  for(i=0; i<MAXNPTS; i++){
+  srand(clock());
+  for(i=0; i<MAXNVRTS; i++){
   	for(j=0; j<POLYDIM; j++){
   	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   	}
   }
-  pl.len = MAXNPTS;
+  pl.len = MAXNVRTS;
   
   bl = pts2bts(pl);
   
@@ -354,30 +355,20 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
   else {
   	int SymNum1, SymNum2;
   	int VPMSymNum1, VPMSymNum2;
-  	PairMat *PM01 = (PairMat *) malloc(sizeof(PairMat)),
-  		  	*PM02 = (PairMat *) malloc(sizeof(PairMat));
   	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
   	VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
   	Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
   
-    /* find the vertex pairing matrices */
-  	Make_VEPM(_P01,&V01,E01,*PM01); 
-  	Make_VEPM(_P02,&V02,E02,*PM02); 
-  
-  	/* find the complete lists of points */
-  	Complete_Poly(*PM01,E01,V01.nv,_P01); 
-  	Complete_Poly(*PM02,E02,V02.nv,_P02); 
-  
     /* compute normal forms */
 	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
-        VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
+    VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
     
    	/* compare the normal forms of the two polytopes */
     equal=1; 
     for(i=0; i<POLYDIM; i++) for(j=0; j<V01.nv; j++) equal = equal && (NF1[i][j]==NF2[i][j]);
     
     /* free allocated memory */
-    free(E01);free(E02);free(_P01);free(_P02);free(PM01);free(PM02);free(VP01);free(VP02); 
+    free(E01);free(E02);free(_P01);free(_P02);free(VP01);free(VP02); 
     
     return equal;
   }
