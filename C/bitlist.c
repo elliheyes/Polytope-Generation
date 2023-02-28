@@ -4,7 +4,7 @@
 /*  ==========						        ==========  */
 /*  ======================================================================  */
 
-#include "Global_5d_7p.h"
+#include "Global.h"
 
 /* compare two arrays */
 char compareArray(int a[],int b[],int size){
