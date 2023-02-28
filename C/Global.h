@@ -1,7 +1,7 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			                     	==========  */
 /*  ==========                    G L O B A L                   ==========  */
-/*  ==========						                            ==========  */
+/*  ==========				                        ==========  */
 /*  ======================================================================  */
 
 #include <stdio.h>
@@ -21,12 +21,12 @@
 #define LLong long long
 
 
-#define MIN -10			  /* lower bound on integers considered for points */
-#define MAXNPTS 6  	      /* maximum number of vertices */
-#define POLYDIM 5		  /* dimension of polytopes */
-#define BINLEN 4		  /* maximum length of binary number */
-#define POPSIZE 200       /* population size */
-#define NUMGEN 200        /* number of generations */
+#define MIN -10	          /* lower bound on integers considered for points */
+#define MAXNVRTS 6  	  /* maximum number of vertices */
+#define POLYDIM 5         /* dimension of polytopes */
+#define BINLEN 4          /* maximum length of binary number */
+#define POPSIZE 150       /* population size */
+#define NUMGEN 300        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -43,7 +43,7 @@
 #define INTERIOR_WEIGHT 0 /* if >0 slows down computation */
 #define NVERTS_WEIGHT 0
 #define NVERTS 6
-#define NPTS_WEIGHT 0
+#define NPTS_WEIGHT 1
 #define NPTS 7
 #define H11_WEIGHT 0
 #define H11 1
@@ -438,26 +438,3 @@ the normal form coordinates NF of the vertices,
 the number of symmetries of the vertex pairing matrix
     (this number is the return value of Make_Poly_Sym_NF).
 */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
