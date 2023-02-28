@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "Rat_5d.h"
+#include "Rat.h"
 
 #define MAX_BAD_EQ	(POLYDIM>5)
 
