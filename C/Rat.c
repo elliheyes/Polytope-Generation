@@ -56,7 +56,7 @@ int  rC(Rat a, Rat b)          /* Compare = [1 / 0 / -1] iff a [gt/eq/lt] b */
      else return 0;
 }
 void Rpr(Rat c)					/* write "c.N/c.D" -> outFN */
-{    fprintf("%d/%d",(int) c.N, (int) c.D);
+{    printf("%d/%d",(int) c.N, (int) c.D);
 } 
 #ifdef	TEST
 void TEST_Rat()
@@ -225,7 +225,7 @@ int  LrC(LRat a, LRat b)          /* Compare = [1 / 0 / -1] iff a [gt/eq/lt] b *
      else return 0;
 }
 void LRpr(LRat c)					/* write "c.N/c.D" -> outFN */
-{    fprintf("%lld/%lld",(LLong) c.N, (LLong) c.D);
+{    printf("%lld/%lld",(LLong) c.N, (LLong) c.D);
 } 
 #ifdef	TEST
 void TEST_LRat()
