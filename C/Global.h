@@ -146,13 +146,13 @@ struct binary
 struct pointlist
 {
   int len;                    /* the number of points */
-  int points[MAXNPTS][POLYDIM];  /* the actual point list */
+  int points[MAXNVRTS][POLYDIM];  /* the actual point list */
 };
 
 struct bitlist
 {
   int len;                        /* number of bits in bitlist */
-  int bits[MAXNPTS*POLYDIM*BINLEN];  /* the actual bitlist */
+  int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
   float fitness;                  /* fitness of bitlist */
   int terminal;                   /* terminal or not */
 };
