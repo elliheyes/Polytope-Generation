@@ -1,7 +1,7 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			   	  	       	==========  */
 /*  ==========      P O P U L A T I O N   F U N C T I O N S     ==========  */
-/*  ==========						                            ==========  */
+/*  ==========					                ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
@@ -175,5 +175,4 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
     /* if fitest individual is kept copy to new population */
     if (keepfitest) (newpop->bl)[0]=blfitest;
  }  
- 
 } 
