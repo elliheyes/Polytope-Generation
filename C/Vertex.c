@@ -1,5 +1,5 @@
 #include "Global.h"
-#include "Rat.h"
+#include "Rat_5d.h"
 
 #define MAX_BAD_EQ	(POLYDIM>5)
 
@@ -10,9 +10,9 @@
 typedef struct {int ne; Equation e[CEQ_Nmax];}              CEqList;
 
 /*  ======================================================================  */
-/*  ==========		     			  	                     	==========  */
+/*  ==========		     			           	==========  */
 /*  ==========	   I N C I D E N C E S (as bit patterns)    	==========  */
-/*  ==========						                         	==========  */ 
+/*  ==========						       	==========  */ 
 /*  ======================================================================  */
 
 #if (VERT_Nmax > LONG_LONG_Nbits)
@@ -127,9 +127,9 @@ void Make_Incidence(PolyPointList *_P, VertexNumList *_V, EqList *_E, FaceInfo *
 }
 
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			   	  	      	==========  */
 /*  ========== G E N E R A L   P U R P O S E   R O U T I N E S  ==========  */
-/*  ==========						                            ==========  */
+/*  ==========						        ==========  */
 /*  ======================================================================  */
 
 int diff(const void *a, const void *b){return *((int *) a) - *((int *) b);} 
@@ -246,9 +246,9 @@ void EL_to_PPL(EqList *_E, PolyPointList *_P, int *n){
 }
 
 /*  ======================================================================  */
-/*  ==========		     			  	                     	==========  */
+/*  ==========		     			  	       	==========  */
 /*  ==========          S T A R T -- S I M P L E X              ==========  */
-/*  ==========		     			  	                    	==========  */
+/*  ==========		     			  	       	==========  */
 /*  ======================================================================  */
 
 /*	return 0 <=> max.dim., E.ne==P.n+1, made Simplex of Vertices of P;  *
@@ -435,9 +435,9 @@ int  GLZ_Start_Simplex(PolyPointList *_P, VertexNumList *_V, CEqList *_C)
 
 
 /*  ======================================================================  */
-/*  ==========		     			  		                    ==========  */
+/*  ==========		     			                ==========  */
 /*  ==========	     P O L Y H E D R O N   A N A L Y S I S  	==========  */
-/*  ==========					                        		==========  */ 
+/*  ==========					              	==========  */ 
 /*  ======================================================================  */
 
 void Make_New_CEqs(PolyPointList *_P, VertexNumList *_V, CEqList *_C, 
@@ -642,9 +642,9 @@ int  IP_Check(PolyPointList *_P, VertexNumList *_V, EqList *_F)
 
 
 /*  ======================================================================  */
-/*  ==========		     			  	                     	==========  */
+/*  ==========		     			  	      	==========  */
 /*  ==========	  D U A L   P O L Y   &   C O M P L E T I O N 	==========  */
-/*  ==========						                        	==========  */ 
+/*  ==========						       	==========  */ 
 /*  ======================================================================  */
 
 void add_for_completion(Long *yDen, Long Den, EqList *_E, PolyPointList *_CP, int *old_np)
@@ -729,69 +729,71 @@ void Compute_InvMat(int n, EqList *_E, int OrdFac[VERT_Nmax],
 	} 
 }
 
-void Complete_Poly(PairMat VPM, EqList *_E, int nv, PolyPointList *_CP, VertexNumList *_V)
+
+void Complete_Poly(PairMat VPM, EqList *_E, int nv, PolyPointList *_CP)
 {
-	int i, j, k;
-	/* check how many bounding hyperplane equations */
-	if(_E->ne>1){
-  		int InsPoint, n=_CP->n, old_np=_CP->np;
-  		Long MaxDist[EQUA_Nmax], InvMat[POLYDIM][POLYDIM], Den=1;
-  		Long yDen[POLYDIM];
-  		int OrdFac[VERT_Nmax], BasFac[POLYDIM], position[POLYDIM];
-  
-  		/* Calculate maximal distances from facets of Delta^* (Vertices of Delta) */
- 		for (i=0;i<_E->ne;i++){  
-  			MaxDist[i]=0;
-   			for (j=0;j<nv;j++) if (MaxDist[i]<VPM[i][j]) MaxDist[i]=VPM[i][j];
-  		} 
+  int i, j, k, InsPoint, n=_CP->n, old_np=_CP->np;
+  Long MaxDist[EQUA_Nmax], InvMat[POLYDIM][POLYDIM], Den=1;
+  Long yDen[POLYDIM];
+  int OrdFac[VERT_Nmax], BasFac[POLYDIM], position[POLYDIM];
 
-  		/* Order facets of Delta^* (Vertices of Delta) w.r.t. MaxDist   */
-  		OrdFac[0]=0;
-  		for (i=1;i<_E->ne;i++){
-   			InsPoint=i; 
-    		while (InsPoint&&(MaxDist[i]<MaxDist[OrdFac[InsPoint-1]])) InsPoint--;
-   			for (j=i;j>InsPoint;j--) OrdFac[j]=OrdFac[j-1];
-    		OrdFac[InsPoint]=i; 
-  		}
+  /*_CP->np=0;*/
 
-  		/* compute the inverse matrix */
-  		Compute_InvMat(n, _E, OrdFac, BasFac, &Den, InvMat);                                 
+  /* Calculate maximal distances from facets of Delta^* (Vertices of Delta) */
+
+  for (i=0;i<_E->ne;i++) {  
+    MaxDist[i]=0;
+    for (j=0;j<nv;j++) 
+    if (MaxDist[i]<VPM[i][j]) MaxDist[i]=VPM[i][j];}
+
+  /* Order facets of Delta^* (Vertices of Delta) w.r.t. MaxDist   */
+
+  OrdFac[0]=0;
+  for (i=1;i<_E->ne;i++){
+    InsPoint=i; 
+    while (InsPoint&&(MaxDist[i]<MaxDist[OrdFac[InsPoint-1]])) InsPoint--;
+    for (j=i;j>InsPoint;j--) OrdFac[j]=OrdFac[j-1];
+    OrdFac[InsPoint]=i; }
+
+  Compute_InvMat(n, _E, OrdFac, BasFac, &Den, InvMat);
+
+  /* printf("Den=%ld  ", Den); mostly 1 or 2!!! */
   
-  		for(i=0;i<n;i++) yDen[i]=0;
-  
-  		/* sets k=n-1; important!   */
-  		for (k=0;k<n-1;k++){   
-    		position[k]=-_E->e[BasFac[k]].c;   
-    		for(i=0;i<n;i++) yDen[i]-=_E->e[BasFac[k]].c*InvMat[i][k]; 
-  		}
-  
-  		position[n-1]=-_E->e[BasFac[n-1]].c-1;
-  
-  		for(i=0;i<n;i++) yDen[i]-=(_E->e[BasFac[k]].c+1)*InvMat[i][n-1];
-  
-  		while(k>=0){
-    		position[k]++;
-    		for(i=0;i<n;i++) yDen[i]+=InvMat[i][k];
-    		add_for_completion(yDen, Den, _E, _CP, &old_np);
-    		for(k=n-1;(k>=0);k--){
-      			if (position[k]!=MaxDist[BasFac[k]]-_E->e[BasFac[k]].c) break;
-      			position[k]=-_E->e[BasFac[k]].c;
-      			for (i=0;i<n;i++) yDen[i]-=MaxDist[BasFac[k]]*InvMat[i][k]; 
-    		}
-  		}
-	}
-	/* if only one bounding hyperplane then find all lattice points on that line */
-	else{
-		
-	}
-       
+  /* Examine all integer points of parallelogram:                         */
+  /* The basic structure of the algorithm is:
+  for (k=0;k<n-1;k++) position[k]=-1;      / * sets k=n-1; important!      *
+  position[n-1]=-2;  / * starting point just outside the parallelogram     *
+  while(k>=0){
+    position[k]++;
+    DO AT position;
+    for(k=n-1;((position[k]==MaxDist[BasFac[k]]-1)&&(k>=0));k--) 
+       position[k]=-1;  }
+         / * sets k to the highest value where pos.[k] wasn't the max value; 
+            resets the following max values to min values                 */
+  /* Quantities linear in position can be changed with every change of
+     position (here: yDen)                                                */
+
+  for(i=0;i<n;i++) yDen[i]=0;
+  for (k=0;k<n-1;k++) {   /* sets k=n-1; important!   */
+    position[k]=-_E->e[BasFac[k]].c;   
+    for(i=0;i<n;i++) yDen[i]-=_E->e[BasFac[k]].c*InvMat[i][k]; }
+  position[n-1]=-_E->e[BasFac[n-1]].c-1;
+  for(i=0;i<n;i++) yDen[i]-=(_E->e[BasFac[k]].c+1)*InvMat[i][n-1];
+  while(k>=0){
+    position[k]++;
+    for(i=0;i<n;i++) yDen[i]+=InvMat[i][k];
+    add_for_completion(yDen, Den, _E, _CP, &old_np);
+    for(k=n-1;(k>=0);k--){
+      if (position[k]!=MaxDist[BasFac[k]]-_E->e[BasFac[k]].c) break;
+      position[k]=-_E->e[BasFac[k]].c;
+      for (i=0;i<n;i++) yDen[i]-=MaxDist[BasFac[k]]*InvMat[i][k]; }}
 }
 
 
 /*  ======================================================================  */
-/*  ==========		     			                    		==========  */
+/*  ==========		     			             	==========  */
 /*  ==========	  B A T Y R E V ' S    F O R M U L A S       	==========  */
-/*  ==========							                        ==========  */ 
+/*  ==========				                        ==========  */ 
 /*  ======================================================================  */
 
 void RaiseDip(INCI x, FaceInfo *_I, int n, int mult){
@@ -1020,4 +1022,3 @@ int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI)
   
   return 1;
 }
-
