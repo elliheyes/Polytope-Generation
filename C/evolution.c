@@ -4,7 +4,7 @@
 /*  ==========				                        ==========  */
 /*  ======================================================================  */
 
-#include "Global_5d_7p.h"
+#include "Global.h"
 
 /* genetically evolve a population */
 struct population * evolvepop(struct population initialpop, int numgen, int meth, int numcuts,
