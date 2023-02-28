@@ -1,10 +1,10 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			                      	==========  */
 /*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
-/*  ==========						                            ==========  */
+/*  ==========				                        ==========  */
 /*  ======================================================================  */
 
-#include "Global.h"
+#include "Global_5d_7p.h"
 
 /* genetically evolve a population */
 struct population * evolvepop(struct population initialpop, int numgen, int meth, int numcuts,
@@ -35,7 +35,7 @@ struct population * evolvepop(struct population initialpop, int numgen, int meth
     if (monitor) monitorevol(gen+1,&(evol[gen+1]));  /* monitor */ 
   }
 
-  if (monitor) printf("\nNumber of terminal states: %i\n",nterm);
+  if (monitor)printf("\nNumber of terminal states: %i\n",nterm);
   
   return evol;
 }  
@@ -46,6 +46,7 @@ void monitorevol(int gen, struct population *pop)
 {
   if (!(gen%10)) printf("Gen    AvFit     MaxFit    #Term\n");
   printf("%3i    %2.4f    %2.4f    %3i\n",gen,pop->avfitness,pop->maxfitness,pop->nterm);
+  fflush(stdout);
 }  
 
 
@@ -78,18 +79,17 @@ struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
 }
 
 
-/* remove redundancy in list of bitlists */
+/* remove equality and equivalence redundancy in list of bitlists */
 void removeredundancy(struct bitlist *bl, int *len)
 {
+  /* remove equality redundancy */
   int cnonred, cactive, red, k; 
-  
   if (*len>1) {
     cnonred=1; cactive=1;
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
         if (bitlistsequal(bl[k],bl[cactive])) red=1;
-        else if (bitlistsequiv(bl[k],bl[cactive])) red=1;
         k++;
       }
       if (!red) {
@@ -100,7 +100,75 @@ void removeredundancy(struct bitlist *bl, int *len)
     }
     *len=cnonred;
     qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
-    
+  }
+  
+  /* remove equivalence redundancy */
+  if (*len>1) {
+    cnonred=1; cactive=1;
+    while (cactive < *len) {
+      red=0; k=0;
+      while (!red && k<cnonred) {
+        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
+        k++;
+      }
+      if (!red) {
+	    bl[cnonred]=bl[cactive];
+	    cnonred++;
+	  }
+      cactive++;
+    }
+    *len=cnonred;
+    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
+  }
+}
+
+/* remove equality redundancy in list of bitlists */
+void removeequality(struct bitlist *bl, int *len)
+{
+  int cnonred, cactive, red, k; 
+  
+  if (*len>1) {
+    cnonred=1; cactive=1;
+    while (cactive < *len) {
+      red=0; k=0;
+      while (!red && k<cnonred) {
+        if (bitlistsequal(bl[k],bl[cactive])) red=1;
+        k++;
+      }
+      if (!red) {
+	    bl[cnonred]=bl[cactive];
+	    cnonred++;
+	  }
+      cactive++;
+    }
+    *len=cnonred;
+    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
+  }
+  
+  
+}
+
+/* remove equivalence redundancy in list of bitlists */
+void removeequiv(struct bitlist *bl, int *len)
+{
+  int cnonred, cactive, red, k; 
+  
+  if (*len>1) {
+    cnonred=1; cactive=1;
+    while (cactive < *len) {
+      red=0; k=0;
+      while (!red && k<cnonred) {
+        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
+        k++;
+      }
+      if (!red) {
+	    bl[cnonred]=bl[cactive];
+	    cnonred++;
+	  }
+      cactive++;
+    }
+    *len=cnonred;
+    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
   }
 }
 
@@ -170,11 +238,14 @@ struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int n
     if (monitor) {
       if (!(cevol%10)) printf("   Run     #Term     #AllTerm\n");
       printf("%6i    %6i    %6i\n",cevol,n,nterm);
+      fflush(stdout);
     }
     
     /* print to file */
     fprintf(fp,"%d %d\n",n,nterm);
+    fflush(fp);
     
+    /* free allocated memory */ 
     free(bl);free(evol);
   }
   
