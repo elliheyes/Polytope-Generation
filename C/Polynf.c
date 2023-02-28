@@ -172,8 +172,8 @@ void TEST_rVM_VPM(int *d,int *v,int *f, Long X[POLYDIM][VERT_Nmax],
 	int i,j,err=0; 
 
 	for(i=0;i<*v;i++){	
-		for(j=0;j<*d;j++) if(abs(X[j][i])>X_Limit) err=X[j][i];
-		for(j=0;j<*f;j++) if(abs(x[j][i])>VPM_Limit) err=x[j][i]; 
+		for(j=0;j<*d;j++) if(llabs(X[j][i])>X_Limit) err=X[j][i];
+		for(j=0;j<*f;j++) if(llabs(x[j][i])>VPM_Limit) err=x[j][i]; 
     }	
      
     if(err){	
@@ -652,4 +652,3 @@ int  SL2Z_Make_Poly_NF(Long X[][VERT_Nmax], int *n, int *nv, SL_Long S[POLYDIM][
      }
      return 1;
 }
-
