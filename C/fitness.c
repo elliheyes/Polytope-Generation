@@ -4,7 +4,7 @@
 /*  ==========				                        ==========  */
 /*  ======================================================================  */
 
-#include "Global_5d_7p.h"
+#include "Global.h"
 
 /* exchange two rows of a matrix */
 void swapRows(int R, int C, int mat[R][C], int row1, int row2, int col)
