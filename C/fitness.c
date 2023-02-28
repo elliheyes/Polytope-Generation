@@ -1,10 +1,10 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			                  	==========  */
 /*  ==========         F I T N E S S   F U N C T I O N          ==========  */
-/*  ==========						                            ==========  */
+/*  ==========				                        ==========  */
 /*  ======================================================================  */
 
-#include "Global.h"
+#include "Global_5d_7p.h"
 
 /* exchange two rows of a matrix */
 void swapRows(int R, int C, int mat[R][C], int row1, int row2, int col)
@@ -154,7 +154,7 @@ void fitness(struct bitlist *bl)
   				}
   				if(interior) numInterior++;
   			}
-  			score += -INTERIOR_WEIGHT*abs(1-numInterior)/(range*POLYDIM);
+  			score += -INTERIOR_WEIGHT*fabs(1-numInterior)/(range*POLYDIM);
   		}
 	
 		/* penalties for topological data */
@@ -167,6 +167,7 @@ void fitness(struct bitlist *bl)
 			if(EULER_WEIGHT > 0) score += -EULER_WEIGHT*abs(6*(8+BH.h1[1]+BH.h1[3]-BH.h1[2])-EULER);
 		}
 	}
+	
     /* free allocated memory */
     free(E);free(_P);free(PM);free(FI);
   }
