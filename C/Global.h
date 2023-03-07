@@ -1,7 +1,7 @@
 /*  ======================================================================  */
-/*  ==========	     			                     	==========  */
+/*  ==========	     			   	  	                    	==========  */
 /*  ==========                    G L O B A L                   ==========  */
-/*  ==========				                        ==========  */
+/*  ==========						                            ==========  */
 /*  ======================================================================  */
 
 #include <stdio.h>
@@ -21,12 +21,12 @@
 #define LLong long long
 
 
-#define MIN -10	          /* lower bound on integers considered for points */
-#define MAXNVRTS 6  	  /* maximum number of vertices */
-#define POLYDIM 5         /* dimension of polytopes */
-#define BINLEN 4          /* maximum length of binary number */
-#define POPSIZE 150       /* population size */
-#define NUMGEN 300        /* number of generations */
+#define MIN -15           /* lower bound on integers considered for points */
+#define MAXNVRTS 5  	  /* maximum number of vertices */
+#define POLYDIM 4         /* dimension of polytopes */
+#define BINLEN 5          /* maximum length of binary number */
+#define POPSIZE 200       /* population size */
+#define NUMGEN 150        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -40,20 +40,19 @@
 /* fitness weights */
 #define DIST_WEIGHT 1 
 #define IP_WEIGHT 1 
-#define INTERIOR_WEIGHT 0 /* if >0 slows down computation */
 #define NVERTS_WEIGHT 0
 #define NVERTS 6
-#define NPTS_WEIGHT 1
+#define NPTS_WEIGHT 0 /* if >0 slows down computation */
 #define NPTS 7
-#define H11_WEIGHT 0
+#define H11_WEIGHT 0 /* if >0 slows down computation */
 #define H11 1
-#define H12_WEIGHT 0
+#define H12_WEIGHT 0 /* if >0 slows down computation */
 #define H12 1
-#define H13_WEIGHT 0
+#define H13_WEIGHT 0 /* if >0 slows down computation */
 #define H13 1
-#define H22_WEIGHT 0
+#define H22_WEIGHT 0 /* if >0 slows down computation */
 #define H22 1
-#define EULER_WEIGHT 0
+#define EULER_WEIGHT 0 /* if >0 slows down computation */
 #define EULER 1
 
 
@@ -335,7 +334,7 @@ void removeredundancy(struct bitlist *bl, int *len);
 struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm);
 
 /* repeated evolution of a random initial population, extracting terminal states */
-struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int numcuts,
+struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm);
 
 
