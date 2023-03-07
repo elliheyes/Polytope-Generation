@@ -1,10 +1,10 @@
 /*  ======================================================================  */
-/*  ==========	     			   	          	==========  */
+/*  ==========	     			   	              	==========  */
 /*  ==========         B I T L I S T   F U N C T I O N S        ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
 
-#include "Global.h"
+#include "Global_4d_5v.h"
 
 /* compare two arrays */
 char compareArray(int a[],int b[],int size){
@@ -15,6 +15,7 @@ char compareArray(int a[],int b[],int size){
 	}
 	return 0;
 }
+
 
 /* convert decimal into binary */
 struct binary decimal2binary(int num)
@@ -138,7 +139,7 @@ struct bitlist randomstate()
   struct pointlist pl;
   int i,j;
   
-  srand(clock());
+  /* srand(clock()); */
   for(i=0; i<MAXNVRTS; i++){
   	for(j=0; j<POLYDIM; j++){
   	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
@@ -166,7 +167,7 @@ int randomchoice(float p[POPSIZE], int len)
   fran=(1.*rand())/RAND_MAX;
 
   P=0.; i=0;
-  while (P<fran) {P=P+p[i]/psum; i++;}
+  while (P<fran && i<len) {P=P+p[i]/psum; i++;}
 
   return i-1;
 }  
@@ -276,6 +277,7 @@ void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cu
     pastebitlist(bl2,blpart1,start);
   }  
 }  
+
 
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2)
