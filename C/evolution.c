@@ -1,255 +1,412 @@
 /*  ======================================================================  */
-/*  ==========	     			                      	==========  */
-/*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
+/*  ==========	     			   	               	==========  */
+/*  ==========         B I T L I S T   F U N C T I O N S        ==========  */
 /*  ==========				                        ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
 
-/* genetically evolve a population */
-struct population * evolvepop(struct population initialpop, int numgen, int meth, int numcuts,
-			      int keepfitest, float mutrate, float alpha, int monitor)
+/* compare two arrays */
+char compareArray(int a[],int b[],int size){
+	int i;
+	for(i=0;i<size;i++){
+		if(a[i]!=b[i])
+			return 1;
+	}
+	return 0;
+}
+
+
+/* convert decimal into binary */
+struct binary decimal2binary(int num)
 {
-  int gen, nterm;
-  struct population *evol;
-
-   /* check validity of numgen */
-  if (numgen>NUMGEN) numgen=NUMGEN;
+  struct binary bin;
+  int binlist[BINLEN];
+  int i,j,k;
   
-  /* allocate memory for evolution */
-  evol = calloc(numgen,sizeof(struct population));
-  if (evol == NULL) {
-    printf("evolvepop: memory allocation failed");
-    exit(0);
-  }  
-
-  /* load initial population */
-  evol[0]=initialpop;
-  if (monitor) monitorevol(0,&(evol[0])); 
-
-  /* main loop over generations */
-  nterm=initialpop.nterm;
-  for (gen=0; gen<numgen-1; gen++) {
-    nextpop(evol[gen],&(evol[gen+1]),meth,numcuts,keepfitest,mutrate,alpha);  /* determine next generation */
-    nterm=nterm+evol[gen+1].nterm;  /* count number of terminal states */
-    if (monitor) monitorevol(gen+1,&(evol[gen+1]));  /* monitor */ 
+  if(num == 0){
+    for(i=0; i < BINLEN; i++){
+      bin.list[i] = 0;
+    }
+    return bin;
   }
-
-  if (monitor)printf("\nNumber of terminal states: %i\n",nterm);
   
-  return evol;
+  for(j=0; num > 0; j++){
+    binlist[j] = num % 2;
+    num /= 2;
+  }
+  
+  for(k=0; k < BINLEN-j; k++){
+    bin.list[k] = 0;
+  }
+    
+  int l=BINLEN-j;
+  int m;
+  for(m=j-1; m >= 0; m--){
+    bin.list[l++] = binlist[m];
+  }
+  
+  return bin;
+}
+
+
+/* convert bit list to integer */
+int binaryToDecimal(struct binary bin)
+{
+  int i, num;
+
+  num=0;
+  for (i=0; i<BINLEN; i++)
+    num=num+bin.list[i]*pow(2,BINLEN-i-1);
+
+  return num;
 }  
 
 
-/* monitor evolution of a population */
-void monitorevol(int gen, struct population *pop)
+/* convert a points list into a bit list after adding max */
+struct bitlist pts2bts(struct pointlist pl)
 {
-  if (!(gen%10)) printf("Gen    AvFit     MaxFit    #Term\n");
-  printf("%3i    %2.4f    %2.4f    %3i\n",gen,pop->avfitness,pop->maxfitness,pop->nterm);
-  fflush(stdout);
-}  
+  struct bitlist bl;
+  struct bitlist * blp = &bl;
+  int i,j,k;
+  int num;
+  struct binary bin;
+    
+  bl.len = MAXNVRTS*POLYDIM*BINLEN;
 
-
-/* select terminal states from a population */
-struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
-{
-  int i,j, k;
-  struct bitlist *bl;
-  
-  /* find the number of terminal states */
-  *numterm=0;
-  for (k=0; k<numgen; k++)
-    for (i=0; i<evol[k].size; i++) 
-      if ((evol[k].bl)[i].terminal){
-        (*numterm)++;
+  for(i=0; i < pl.len; i++){
+    for(j=0; j < POLYDIM; j++){
+      num = pl.points[i][j];
+      bin = decimal2binary(num - MIN);
+      for(k=0; k < BINLEN; k++){
+        bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k] = bin.list[k];
       }
- 
-   /* allocate memory for terminal states */
-  bl = calloc(*numterm,sizeof(struct bitlist)); 
-
-  /* store terminal states in allocated space */
-  j=0;
-  for (k=0; k<numgen; k++)
-    for (i=0; i<evol[k].size; i++) 
-      if ((evol[k].bl)[i].terminal){
-	    bl[j]=(evol[k].bl)[i]; j++;
-      }
-				 
-   return bl;
-}
-
-
-/* remove equality and equivalence redundancy in list of bitlists */
-void removeredundancy(struct bitlist *bl, int *len)
-{
-  /* remove equality redundancy */
-  int cnonred, cactive, red, k; 
-  if (*len>1) {
-    cnonred=1; cactive=1;
-    while (cactive < *len) {
-      red=0; k=0;
-      while (!red && k<cnonred) {
-        if (bitlistsequal(bl[k],bl[cactive])) red=1;
-        k++;
-      }
-      if (!red) {
-	    bl[cnonred]=bl[cactive];
-	    cnonred++;
-	  }
-      cactive++;
     }
-    *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
   }
   
-  /* remove equivalence redundancy */
-  if (*len>1) {
-    cnonred=1; cactive=1;
-    while (cactive < *len) {
-      red=0; k=0;
-      while (!red && k<cnonred) {
-        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
-        k++;
-      }
-      if (!red) {
-	    bl[cnonred]=bl[cactive];
-	    cnonred++;
-	  }
-      cactive++;
-    }
-    *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
-  }
-}
-
-/* remove equality redundancy in list of bitlists */
-void removeequality(struct bitlist *bl, int *len)
-{
-  int cnonred, cactive, red, k; 
-  
-  if (*len>1) {
-    cnonred=1; cactive=1;
-    while (cactive < *len) {
-      red=0; k=0;
-      while (!red && k<cnonred) {
-        if (bitlistsequal(bl[k],bl[cactive])) red=1;
-        k++;
-      }
-      if (!red) {
-	    bl[cnonred]=bl[cactive];
-	    cnonred++;
-	  }
-      cactive++;
-    }
-    *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
-  }
-  
-  
-}
-
-/* remove equivalence redundancy in list of bitlists */
-void removeequiv(struct bitlist *bl, int *len)
-{
-  int cnonred, cactive, red, k; 
-  
-  if (*len>1) {
-    cnonred=1; cactive=1;
-    while (cactive < *len) {
-      red=0; k=0;
-      while (!red && k<cnonred) {
-        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
-        k++;
-      }
-      if (!red) {
-	    bl[cnonred]=bl[cactive];
-	    cnonred++;
-	  }
-      cactive++;
-    }
-    *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
-  }
-}
-
-
-/* select terminal states from a population and remove redundancy */
-struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm)
-{
-  struct bitlist *bl;
-
-  /* extract terminal states */
-  bl=termstates(evol,numgen,numterm);
-  
-  /* remove redundancy in the list of terminal states */
-  removeredundancy(bl,numterm);
+  fitness(blp);
   
   return bl;
+}
+
+
+/* convert a bit list into a reduced points list and subtract max */
+struct pointlist bts2pts(struct bitlist bl)
+{
+  struct pointlist pl;
+  int i,j,k;
+  int count=0;
+  int new;
+  int point[POLYDIM];
+  struct binary bin;
+  
+  for(i=0; i<MAXNVRTS; i++){
+    
+    for(j=0; j<POLYDIM; j++){
+      for(k=0; k<BINLEN; k++){
+        bin.list[k] = bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k];
+      }
+      point[j] = binaryToDecimal(bin) + MIN;  
+    }
+    
+    /* check if new point already exists in the list */
+    new=1;
+    for(j=0; j<count; j++) if(!compareArray(point, pl.points[j], POLYDIM)) new=0;
+    
+    if(new){
+      for(j=0; j<POLYDIM; j++) pl.points[count][j] = point[j]; 
+      count++;
+    }
+    
+  }
+  pl.len = count;
+  
+  return pl;
+}
+
+
+/* generate a random integer in a range from min to max */
+int randomint(int min, int max)
+{
+  return round((1.* rand())/RAND_MAX*(max-min))+min;
 }  
 
 
-/* repeated evolution of a random initial population, extracting terminal states */
-struct bitlist * searchenv(int numevol, int numgen, int popsize, int meth, int numcuts,
-			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm)
+/* generate a random state */
+struct bitlist randomstate()
 {
-  int cevol, n, i, nterm;
-  struct population *evol;
-  struct bitlist *bl, *blterm, *bltermOld;
+  struct bitlist bl;
+  struct pointlist pl;
+  int i,j;
+  
+  /* srand(clock()); */
+  for(i=0; i<MAXNVRTS; i++){
+  	for(j=0; j<POLYDIM; j++){
+  	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
+  	}
+  }
+  pl.len = MAXNVRTS;
+  
+  bl = pts2bts(pl);
+  
+  return bl;
+} 
 
-  /* main loop over evolutions */
-  nterm=0;
-  for (cevol=0; cevol<numevol; cevol++){
-    
-    /* evolve random population */
-    evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
-    
-    /* extract terminal states and remove redundancy */
-    bl=termstatesred(evol,numgen,&n);
-    nterm=nterm+n;
-    
-    /* allocate or re-allocate memory for terminal states */
-    if (cevol==0) {
-        blterm=calloc(nterm,sizeof(struct bitlist));
-    }
-    else {
-        if(n!=0){
-            bltermOld=calloc(nterm - n,sizeof(struct bitlist));;
-            for (i=0; i< nterm - n; i++) bltermOld[i]=blterm[i];
-            free(blterm);
-            blterm=calloc(nterm,sizeof(struct bitlist));
-            for (i=0; i< nterm - n; i++) blterm[i]=bltermOld[i];
-            free(bltermOld);
+
+/* generate a random choice for integers 0,...,len-1 for a probability distribution p */
+int randomchoice(float p[POPSIZE], int len)
+{
+  float psum, P, fran;
+  int i;
+
+  /* determine normalisation */
+  psum=0;
+  for (i=0; i<len;i++ ) psum=psum+p[i];
+
+  /* generate random float in range [0,1] */
+  fran=(1.*rand())/RAND_MAX;
+
+  P=0.; i=0;
+  while (P<fran && i<len) {P=P+p[i]/psum; i++;}
+
+  return i-1;
+}  
+
+ 
+/* flips bit in position pos for a bitlist bl */
+void flipbit(struct bitlist *bl, int pos)
+{
+  if ((pos>=0) && (pos<(bl->len))){
+    (bl->bits)[pos]=((bl->bits)[pos]+1) % 2;
+  } 
+}  
+
+
+/* copies the bits in bitlist bl from position pos1 to pos2-1 into a new bitlist */
+struct bitlist copybitlist(struct bitlist bl, int pos1, int pos2)
+{
+  struct bitlist blcopy;
+  int i, p1, p2;
+
+  /* make sure positions are viable */
+  if (pos1<=pos2) {p1=pos1; p2=pos2;}
+  else {p1=pos2; p2=pos1;}
+  if (p1<0) p1=0;
+  if (p2<0) p2=0;
+  if (p1>bl.len) p1=bl.len;
+  if (p2>bl.len) p2=bl.len;
+
+  /* copy section of bit list */
+  if (p1<p2) {
+    for (i=0; i<(p2-p1); i++) blcopy.bits[i]=bl.bits[p1+i];
+    blcopy.len=p2-p1;
+  }
+  else blcopy.len=0;
+  blcopy.fitness=0.; blcopy.terminal=0;
+
+  return blcopy;
+}  
+
+
+/* pastes bitlist blpaste into bitlist bl at position pos, overwriting previous content in bl */
+void pastebitlist(struct bitlist *bl, struct bitlist blpaste, int pos)
+{
+  int len, i;
+
+  /* make sure position and length are ok */
+  if (pos<0) pos=0;
+  if (pos>=bl->len) pos=bl->len-1;
+  len=((pos+blpaste.len<=bl->len) ? blpaste.len : bl->len-pos);
+
+  /*copy b1paste into bl */
+  if (len>0) {
+    for (i=0; i<len; i++) (bl->bits)[pos+i]=blpaste.bits[i];
+  }
+}
+
+									  
+/* a simple insertion sort of an integer array into ascending order */
+void isort(int arr[], int len)
+{
+    int i, key, j;
+    for (i = 1; i < len; i++)
+    {
+        key = arr[i];
+        j = i - 1;
+
+        while (j >= 0 && arr[j] > key)
+        {
+            arr[j + 1] = arr[j];
+            j = j - 1;
         }
-        /*blterm=realloc(blterm,(*nterm)*sizeof(struct bitlist));*/
+        arr[j + 1] = key;
     }
-    
-    if (blterm==NULL) {
-      printf("serchenv: memory allocation failed");
-      exit(0);
+}
+									  
+
+/* crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts */
+void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cuts[NUMCUTS])
+{
+
+  int i, minlen, start, end, cuts1[NUMCUTS+2];
+  struct bitlist blpart1, blpart2;
+
+  /* set lengths of bitlists to common minimum */
+  minlen=((bl1->len < bl2->len) ? bl1->len : bl2->len);
+  bl1->len=minlen; bl2->len=minlen;
+
+  /* check range of cut positions */
+  cuts1[0]=0; cuts1[numcuts+1]=minlen;
+  for (i=0; i<numcuts; i++) {
+    cuts1[i+1]=cuts[i];
+    if (cuts[i]<0) cuts1[i+1]=0;
+    if (cuts[i]>=minlen) cuts1[i+1]=minlen-1;
+  }  
+  
+  /* sort cut positions in ascending order */
+  isort(cuts1,numcuts+2);
+  /* for (i=0; i<numcuts+2; i++) printf("%i,",cuts1[i]);
+     printf("\n"); */
+
+  /* swap the relevant parts of the two bitlists */
+  for (i=0; i<=numcuts; i=i+2) {
+    start=cuts1[i]; end=cuts1[i+1];
+    blpart1=copybitlist(*bl1,start,end);
+    blpart2=copybitlist(*bl2,start,end);
+    pastebitlist(bl1,blpart2,start);
+    pastebitlist(bl2,blpart1,start);
+  }  
+}  
+
+
+/* compare two bistlist by their fitness */
+int compbitlist(const void *p1, const void *p2)
+{
+  const struct bitlist *bl1=p1, *bl2=p2;
+
+  if (bl1->fitness < bl2->fitness) return 1;
+  else if  (bl1->fitness > bl2->fitness) return -1;
+  else return 0;
+}  
+
+
+/* decide if two bistlist are identical */
+int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
+{
+  int i, equal;
+  
+  if (bl1.len != bl2.len) return 0;
+  else {
+    equal=1; i=0;
+    while (equal && i<bl1.len) {
+      equal = equal && (bl1.bits[i]==bl2.bits[i]);
+      i++;
     }
+    return equal;
+  } 
+}
+
+
+/* decide if two bistlist are equivalent by comparing their normal forms */
+int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
+{
+  int i, j, equal;
+  struct pointlist pl1, pl2;
+  VertexNumList V01, V02;
+  EqList *E01 = (EqList *) malloc(sizeof(EqList)),
+         *E02 = (EqList *) malloc(sizeof(EqList));
+  PolyPointList *_P01 = (PolyPointList *) malloc(sizeof(PolyPointList)),
+   				*_P02 = (PolyPointList *) malloc(sizeof(PolyPointList));
+  int IP1, IP2;
+  
+  
+  /* transform the bitlists into point lists */
+  pl1 = bts2pts(bl1);
+  pl2 = bts2pts(bl2);
+  
+  /* define the number polytope dimension */
+  _P01->n=POLYDIM; _P02->n=POLYDIM; 
     
-    /* load in new terminal states */
-    for (i=0; i<n; i++) blterm[(nterm)-n+i]=bl[i];
+  /* define the number of points */
+  _P01->np=pl1.len; _P02->np=pl2.len;
     
-    /* remove redundancy on entire set */
-    removeredundancy(blterm,&nterm);
-    
-    /* monitor */
-    if (monitor) {
-      if (!(cevol%10)) printf("   Run     #Term     #AllTerm\n");
-      printf("%6i    %6i    %6i\n",cevol,n,nterm);
-      fflush(stdout);
+  /* define the points */
+  for(i=0; i<pl1.len; i++){
+    for(j=0; j<POLYDIM; j++){
+      _P01->x[i][j]=pl1.points[i][j];
     }
+  } 
+  for(i=0; i<pl2.len; i++){
+    for(j=0; j<POLYDIM; j++){
+      _P02->x[i][j]=pl2.points[i][j];
+    }
+  } 
     
-    /* print to file */
-    fprintf(fp,"%d %d\n",n,nterm);
-    fflush(fp);
+  /* find the bounding hyperplane equations of the polytope */
+  IP1=Find_Equations(_P01,&V01,E01); 
+  IP2=Find_Equations(_P02,&V02,E02); 
+  
+  /* check if the number of vertices match */
+  if (V01.nv != V02.nv){
+     /* free allocated memory */
+  	 free(E01);free(E02);free(_P01);free(_P02);
+  
+     /* if the number of vertices don't match then return 0 */
+  	 return 0;
+  }
+  else {
+  	int SymNum1, SymNum2;
+  	int VPMSymNum1, VPMSymNum2;
+  	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
+  	VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
+  	Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
+  
+    /* compute normal forms */
+	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
+    VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
     
-    /* free allocated memory */ 
-    free(bl);free(evol);
+   	/* compare the normal forms of the two polytopes */
+    equal=1; 
+    for(i=0; i<POLYDIM; i++) for(j=0; j<V01.nv; j++) equal = equal && (NF1[i][j]==NF2[i][j]);
+    
+    /* free allocated memory */
+    free(E01);free(E02);free(_P01);free(_P02);free(VP01);free(VP02); 
+    
+    return equal;
   }
   
-  *numterm = nterm;
+}
 
-  return blterm; 
+
+/* write bitlist to a file in the format of the list of vertices  */
+void fprintbitlist(FILE * fp, struct bitlist bl)
+{
+  int i,j,IP;
+  struct pointlist pl;
+  VertexNumList V;
+  EqList *E = (EqList *) malloc(sizeof(EqList));
+  PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
+  
+  pl = bts2pts(bl);
+  
+  _P->n=POLYDIM; 
+  _P->np=pl.len; 
+  
+  for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
+    
+  IP=Find_Equations(_P,&V,E); 
+  
+  fprintf(fp,"[");
+  for(i=0; i<V.nv; i++){
+    fprintf(fp,"[");
+    for(j=0; j<POLYDIM; j++){
+      fprintf(fp,"%lld",_P->x[V.v[i]][j]);
+      if(j!=POLYDIM-1) fprintf(fp,",");
+    }
+    fprintf(fp,"]");
+  }
+  fprintf(fp,"]\n");
+  
+  free(E);free(_P);
+  
 }
