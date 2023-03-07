@@ -21,9 +21,6 @@ Notes:
     
   x IP_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
     does not satisfy the interior point property.
-    
-  x INTERIOR_WEIGHT: if this is > 0 then a penalty is added to the fitness for the number
-    of interior points. Note that this slows down the genetic algorithm considerably.
 
   x NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
     does not have NVERTS number of vertices. NVERTS is also defined in 'Global.h'. This 
