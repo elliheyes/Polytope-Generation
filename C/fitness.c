@@ -1,7 +1,7 @@
 /*  ======================================================================  */
-/*  ==========	     			                  	==========  */
+/*  ==========	     			   	  	       	==========  */
 /*  ==========         F I T N E S S   F U N C T I O N          ==========  */
-/*  ==========				                        ==========  */
+/*  ==========					                ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
@@ -133,8 +133,8 @@ void fitness(struct bitlist *bl)
 	/* penalty for the number of vertices */
 	if(NVERTS_WEIGHT>0) score += -NVERTS_WEIGHT*abs(V.nv-NVERTS);
 	
-	if(NPTS_WEIGHT > 0 || INTERIOR_WEIGHT > 0 || H11_WEIGHT > 0 || 
-		H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0 || EULER_WEIGHT > 0){
+	if(score==0 && (NPTS_WEIGHT > 0 || EULER_WEIGHT > 0 || H11_WEIGHT > 0 || 
+		H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0)){
 		/* find the vertex pairing matrices */
   		Make_VEPM(_P,&V,E,*PM); 
   	
@@ -143,20 +143,7 @@ void fitness(struct bitlist *bl)
   		
   		/* penalty for the number of points */
 		if(NPTS_WEIGHT>0) score += -NPTS_WEIGHT*abs(_P->np-NPTS);
-  		
-  		/* penalty for number of interior points */
-  		if(INTERIOR_WEIGHT>0){
-  			numInterior = 0.;
-  			for(i=0; i<_P->np; i++){
-  				interior = 1;
-  				for(j=0; j<E->ne; j++){
-  					if(Eval_Eq_on_V(&E->e[j],_P->x[i],_P->n) == 0) interior=0;
-  				}
-  				if(interior) numInterior++;
-  			}
-  			score += -INTERIOR_WEIGHT*fabs(1-numInterior)/(range*POLYDIM);
-  		}
-	
+  			
 		/* penalties for topological data */
 		if(score == 0){
 			QuickAnalysis(_P, &BH, FI);
