@@ -1,13 +1,13 @@
 /*  ======================================================================  */
 /*  ==========	     			   	  	       	==========  */
 /*  ==========      P O P U L A T I O N   F U N C T I O N S     ==========  */
-/*  ==========					                ==========  */
+/*  ==========						        ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
 
-/* generate a random population of size popsize */
 
+/* generate a random population of size popsize */
 struct population randompop(int popsize)
 {
   int size, i;
@@ -29,7 +29,6 @@ struct population randompop(int popsize)
 
 
 /* sort a population by fitness */
-
 void sortpop(struct population *pop)
 {
   qsort(pop->bl,pop->size,sizeof(struct bitlist),compbitlist);
@@ -37,7 +36,6 @@ void sortpop(struct population *pop)
 
 
 /* mutate a population */
-
 void mutatepop(struct population *pop, float mutrate)
 {
   int len, nbits, nmut, i, k, pos, ipos, bpos;
@@ -65,7 +63,6 @@ void mutatepop(struct population *pop, float mutrate)
 
 
 /* find fittest in a population */
-
 struct bitlist fitestinpop(struct population *pop)
 {
   float fmax;
@@ -83,7 +80,6 @@ struct bitlist fitestinpop(struct population *pop)
       
 
 /* find average fitness of a population */
-
 float avfitness(struct population *pop)
 {
   float fsum=0.;
@@ -96,7 +92,6 @@ float avfitness(struct population *pop)
   
 
 /* find number of terminal state in population */
-
 int nterminalpop(struct population *pop)
 {
   int i, nterm;
@@ -110,7 +105,6 @@ int nterminalpop(struct population *pop)
 
 
 /* generate the next population from a given one by selection, crossing and mutation */
-
 void nextpop(struct population pop, struct population *newpop, int meth, int numcuts, int keepfitest,
 	     float mutrate, float alpha)
 {
