@@ -21,12 +21,12 @@
 #define LLong long long
 
 
-#define MIN -15           /* lower bound on integers considered for points */
+#define MIN -31			  /* lower bound on integers considered for points */
 #define MAXNVRTS 5  	  /* maximum number of vertices */
-#define POLYDIM 4         /* dimension of polytopes */
-#define BINLEN 5          /* maximum length of binary number */
+#define POLYDIM 4		  /* dimension of polytopes */
+#define BINLEN 6		  /* maximum length of binary number */
 #define POPSIZE 200       /* population size */
-#define NUMGEN 150        /* number of generations */
+#define NUMGEN 200        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -54,6 +54,7 @@
 #define H22 1
 #define EULER_WEIGHT 0 /* if >0 slows down computation */
 #define EULER 1
+#define FIB_WEIGHT 1 
 
 
 #define POINT_Nmax 2000000         /* maximum number of points */
@@ -137,6 +138,8 @@ these routines are designed to simulate the above definitions.
 
 /*  ============           	S T R U C T U R E S              ============  */
 
+
+
 struct binary
 {
   int list[BINLEN];  /* the actual binary list */
@@ -150,10 +153,10 @@ struct pointlist
 
 struct bitlist
 {
-  int len;                        /* number of bits in bitlist */
+  int len;                            /* number of bits in bitlist */
   int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
-  float fitness;                  /* fitness of bitlist */
-  int terminal;                   /* terminal or not */
+  float fitness;                      /* fitness of bitlist */
+  int terminal;                       /* terminal or not */
 };
 
 struct population
@@ -164,6 +167,18 @@ struct population
   int nterm;                   /* number of terminal states in population */
   struct bitlist bl[POPSIZE];  /* the actual population */
 };  
+
+struct shortlist
+{
+  Long S1[POINT_Nmax][POLYDIM];      /* the S1 list */
+  Long S2[POINT_Nmax][POLYDIM];      /* the S2 list */
+  Long S3[POINT_Nmax][POLYDIM];      /* the S3 list */
+};
+
+struct slist
+{
+  int list[3];      /* the s list */
+};
 
 typedef struct {int n, np; Long x[POINT_Nmax][POLYDIM];} PolyPointList;
 /*
@@ -418,6 +433,8 @@ int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI);
 Fast computation of FaceInfo and Hodge numbers.
 */
 
+
+
 /*  ============             N O R M A L   F O R M                ============  */
 
 
@@ -437,3 +454,12 @@ the normal form coordinates NF of the vertices,
 the number of symmetries of the vertex pairing matrix
     (this number is the return value of Make_Poly_Sym_NF).
 */
+
+
+
+/*  ============             F I B R A T I O N                ============  */
+
+
+
+/* determine if there exists an elliptic fibration */
+int fibration(PolyPointList *_P, VertexNumList *_V);
