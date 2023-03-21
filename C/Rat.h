@@ -51,3 +51,4 @@ void  Map_Permut(int *d,int *pi,int *pinv,ARG_FUN,void *AuxPtr);
 
 Long  W_to_GLZ(Long *W, int *d, Long **GLZ);	/* "triangluar" form of GLZ */
 Long  PW_to_GLZ(Long *W, int *d, Long **GLZ);	/* improved by permutations */
+
