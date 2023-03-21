@@ -1,7 +1,7 @@
 /*  ======================================================================  */
 /*  ==========	     			   	  	       	==========  */
 /*  ==========         F I T N E S S   F U N C T I O N          ==========  */
-/*  ==========					                ==========  */
+/*  ==========						        ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
@@ -95,7 +95,7 @@ void fitness(struct bitlist *bl)
   /* if the dimension of the polytope is less than POLYDIM then assign a large penalty */
   if(dim < POLYDIM) score = -10;
   else{
-    int i, j, k, IP, interior, h11, h12, h13, h22, euler, range=pow(2,BINLEN)-1;
+    int i, j, k, IP, interior, h11, h12, h13, h22, euler;
   	float numInterior, totalDist, avDist;
     VertexNumList V;
     EqList *E = (EqList *) malloc(sizeof(EqList));
@@ -127,14 +127,15 @@ void fitness(struct bitlist *bl)
     	totalDist = 0.;
     	for(i=0; i<E->ne; i++) totalDist += llabs(E->e[i].c-1);
     	avDist = totalDist/E->ne;
-    	score += -DIST_WEIGHT*avDist/(range*POLYDIM);
+    	score += -DIST_WEIGHT*avDist;
     }
 
 	/* penalty for the number of vertices */
 	if(NVERTS_WEIGHT>0) score += -NVERTS_WEIGHT*abs(V.nv-NVERTS);
-	
-	if(score==0 && (NPTS_WEIGHT > 0 || EULER_WEIGHT > 0 || H11_WEIGHT > 0 || 
-		H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0)){
+	  
+	if (score==0 && ( FIB_WEIGHT > 0 || NPTS_WEIGHT > 0 || EULER_WEIGHT > 0 || 
+	    H11_WEIGHT > 0 || H12_WEIGHT > 0 || H13_WEIGHT > 0 || H22_WEIGHT > 0)){
+		
 		/* find the vertex pairing matrices */
   		Make_VEPM(_P,&V,E,*PM); 
   	
@@ -142,18 +143,21 @@ void fitness(struct bitlist *bl)
   		Complete_Poly(*PM,E,V.nv,_P); 
   		
   		/* penalty for the number of points */
-		if(NPTS_WEIGHT>0) score += -NPTS_WEIGHT*abs(_P->np-NPTS);
+	    if(NPTS_WEIGHT>0) score += -NPTS_WEIGHT*abs(_P->np-NPTS);
   			
 		/* penalties for topological data */
-		if(score == 0){
-			QuickAnalysis(_P, &BH, FI);
-			if(H11_WEIGHT > 0) score += -H11_WEIGHT*abs(BH.h1[1]-H11);
-			if(H12_WEIGHT > 0) score += -H12_WEIGHT*abs(BH.h1[2]-H11);
-			if(H13_WEIGHT > 0) score += -H13_WEIGHT*abs(BH.h1[3]-H11);
-			if(H22_WEIGHT > 0) score += -H22_WEIGHT*abs(BH.h22-H22);
-			if(EULER_WEIGHT > 0) score += -EULER_WEIGHT*abs(6*(8+BH.h1[1]+BH.h1[3]-BH.h1[2])-EULER);
-		}
-	}
+		QuickAnalysis(_P, &BH, FI);
+		if(H11_WEIGHT > 0) score += -H11_WEIGHT*abs(BH.h1[1]-H11);
+		if(H12_WEIGHT > 0) score += -H12_WEIGHT*abs(BH.h1[2]-H11);
+		if(H13_WEIGHT > 0) score += -H13_WEIGHT*abs(BH.h1[3]-H11);
+		if(H22_WEIGHT > 0) score += -H22_WEIGHT*abs(BH.h22-H22);
+		if(EULER_WEIGHT > 0) score += -EULER_WEIGHT*abs(6*(8+BH.h1[1]+BH.h1[3]-BH.h1[2])-EULER);
+		
+		/* penalty for elliptic fibration */  
+		if (FIB_WEIGHT > 0){
+	      if (!fibration(_P, &V)) score += -FIB_WEIGHT;
+	    }
+	  }
 	
     /* free allocated memory */
     free(E);free(_P);free(PM);free(FI);
