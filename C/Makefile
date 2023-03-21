@@ -19,5 +19,5 @@ evolution.o:    Global.h
 Rat.o:          Global.h Rat.h
 Vertex.o:       Global.h Rat.h
 Polynf.o:       Global.h Rat.h
-Fibration.o:     Global.h
+Fibration.o:    Global.h
 gen_poly.o:     Global.h 
