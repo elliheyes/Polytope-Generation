@@ -1,6 +1,6 @@
 # 				M A K E  F I L E
 
-SOURCES= Rat.c Vertex.c Polynf.c bitlist.c fitness.c population.c evolution.c
+SOURCES= Rat.c Vertex.c Polynf.c Fibration.c bitlist.c fitness.c population.c evolution.c
 OBJECTS= $(SOURCES:.c=.o)
 
 LIBS = -lm
@@ -19,4 +19,5 @@ evolution.o:    Global.h
 Rat.o:          Global.h Rat.h
 Vertex.o:       Global.h Rat.h
 Polynf.o:       Global.h Rat.h
+Fibration.o     Global.h
 gen_poly.o:     Global.h 
