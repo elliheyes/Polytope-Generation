@@ -21,10 +21,10 @@
 #define LLong long long
 
 
-#define MIN -31			  /* lower bound on integers considered for points */
+#define MIN -31	          /* lower bound on integers considered for points */
 #define MAXNVRTS 5  	  /* maximum number of vertices */
-#define POLYDIM 4		  /* dimension of polytopes */
-#define BINLEN 6		  /* maximum length of binary number */
+#define POLYDIM 4	  /* dimension of polytopes */
+#define BINLEN            /* maximum length of binary number */
 #define POPSIZE 200       /* population size */
 #define NUMGEN 200        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
