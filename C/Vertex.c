@@ -1,5 +1,5 @@
-#include "Global.h"
-#include "Rat.h"
+#include "Global_4d_5v.h"
+#include "Rat_4d_5v.h"
 
 #define MAX_BAD_EQ	(POLYDIM>5)
 
@@ -119,7 +119,10 @@ void Make_Incidence(PolyPointList *_P, VertexNumList *_V, EqList *_E, FaceInfo *
 	        	}
 	        	/* non-comparable => new face */
 	        	if(*n==k){   
-	        		assert(k<FACE_Nmax); _I->v[d][k]=x; _I->f[d][k]=u; (*n)++;
+	        		assert(k<FACE_Nmax); 
+	        		_I->v[d][k]=x; 
+	        		_I->f[d][k]=u; 
+	        		(*n)++;
 	        	}
 	    	}
 		}
@@ -162,53 +165,90 @@ int VNL_to_DEL(PolyPointList *_P, VertexNumList *_V, EqList *_DE){
 #define	 LLong_EEV		(1)    /* 1 @ [4662 4 20 333 422 1554 2329] */
 #define  TEST_EEV	      	(0)	       /* compare Long to LLong EEV */
 
-Equation EEV_To_Equation(Equation *_E1, Equation *_E2, Long *_V, int n){
+Equation EEV_To_Equation(Equation *_E1, Equation *_E2, Long *_V, int n)
+{
   /* Calculate the equation spanned by _V and the intersection of _E1, _E2  */
-  int i; Long l, m, g; Equation Eq;
+  int i; 
+  Long l, m, g; 
+  Equation Eq;
+  
   l=Eval_Eq_on_V(_E2,_V,n);
   m=Eval_Eq_on_V(_E1,_V,n);
-  g=NNgcd(l,m); assert(g); l/=g; m/=g;
-#if ((!(LLong_EEV))||(TEST_EEV))			    /* Long version */
-  for(i=0;i<n;i++) Eq.a[i]=l*_E1->a[i]-m*_E2->a[i];
-  { int gcd=Eq.c=l*_E1->c-m*_E2->c;
-    for(i=0;i<n;i++) gcd=NNgcd(gcd,Eq.a[i]); assert(gcd);
-    if (gcd!=1) { for(i=0;i<n;i++) Eq.a[i]/=gcd; Eq.c/=gcd;}}
-#endif
-#if ((LLong_EEV)||(TEST_EEV))				   /* LLong version */
-  { LLong A[POLYDIM], C, G; for(i=0;i<n;i++) 
-	A[i]=((LLong) l)*((LLong)_E1->a[i])-((LLong)m)*((LLong)_E2->a[i]);
-    G=C=((LLong) l)*((LLong)_E1->c)-((LLong)m)*((LLong)_E2->c);
-    for(i=0;i<n;i++) G=LNNgcd(G,A[i]); assert(G);
-    if(G!=1) {C/=G; for(i=0;i<n;i++) A[i]/=G;}
-#if	(TEST_EEV)						 /* Compare */
-    {	int e=(Eq.c!=C); for(i=0;i<n;i++) if(Eq.a[i]!=A[i]) e=1;     
-	if(e) { printf("Error in EEV: l=%d m=%d g=%d\n",l,m,g);
-	for(i=0;i<n;i++)printf("%d ",_E1->a[i]);printf("  %d = E1\n",_E1->c);
-	for(i=0;i<n;i++)printf("%d ",_E2->a[i]);printf("  %d = E2\n",_E2->c);
-	for(i=0;i<n;i++)printf("%d ",Eq.a[i]);printf("  %d = Eq\n",Eq.c);
-	for(i=0;i<n;i++)printf("%d ",A[i]);printf("  %d = LL_Eq\n",C);
-	exit(0); }
+  
+  g=NNgcd(l,m); 
+  assert(g); 
+
+  l/=g; 
+  m/=g;
+  
+  /* Long version */
+  #if ((!(LLong_EEV))||(TEST_EEV))			    
+  	for(i=0;i<n;i++) Eq.a[i]=l*_E1->a[i]-m*_E2->a[i];
+  	{ 
+  		int gcd=Eq.c=l*_E1->c-m*_E2->c;
+    	for(i=0;i<n;i++) gcd=NNgcd(gcd,Eq.a[i]); 
+    	assert(gcd);
+    	if (gcd!=1) { 
+    		for(i=0;i<n;i++) Eq.a[i]/=gcd; Eq.c/=gcd;
+    	}
     }
-#else
-    Eq.c=C; for(i=0;i<n;i++) Eq.a[i]=A[i];
-#endif
+  #endif
+
+  /* LLong version */
+  #if ((LLong_EEV)||(TEST_EEV))				   
+  { 
+    LLong A[POLYDIM], C, G; 
+    for(i=0;i<n;i++) A[i]=((LLong) l)*((LLong)_E1->a[i])-((LLong)m)*((LLong)_E2->a[i]);
+    G=C=((LLong) l)*((LLong)_E1->c)-((LLong)m)*((LLong)_E2->c);
+    for(i=0;i<n;i++) G=LNNgcd(G,A[i]); 
+    assert(G);
+    if(G!=1) {
+      C/=G; 
+      for(i=0;i<n;i++) A[i]/=G;
+    }
+    /* Compare */
+    #if (TEST_EEV)						
+    {	
+      int e=(Eq.c!=C); 
+      for(i=0;i<n;i++) if(Eq.a[i]!=A[i]) e=1;     
+	  if(e) { 
+	    printf("Error in EEV: l=%d m=%d g=%d\n",l,m,g);
+	    for(i=0;i<n;i++)printf("%d ",_E1->a[i]);printf("  %d = E1\n",_E1->c);
+	    for(i=0;i<n;i++)printf("%d ",_E2->a[i]);printf("  %d = E2\n",_E2->c);
+	    for(i=0;i<n;i++)printf("%d ",Eq.a[i]);printf("  %d = Eq\n",Eq.c);
+	    for(i=0;i<n;i++)printf("%d ",A[i]);printf("  %d = LL_Eq\n",C);
+	    exit(0); 
+	  }
+    }
+    #else
+      Eq.c=C; for(i=0;i<n;i++) Eq.a[i]=A[i];
+    #endif
   }
-#endif
+  #endif
   return Eq;
 }
 
-Long Eval_Eq_on_V(Equation *E, Long *V, int i){    
-  Long p=E->c; while(i--) p+=V[i]*E->a[i];
+Long Eval_Eq_on_V(Equation *E, Long *V, int i)
+{    
+  Long p=E->c; 
+  while(i--) p+=V[i]*E->a[i];
   return p;
 }
 
-Long DualBraP1(Long *X, Long *Y, int n){    
-  Long p=1; while(n--) p+=X[n] * Y[n];
+Long DualBraP1(Long *X, Long *Y, int n)
+{    
+  Long p=1; 
+  while(n--) p+=X[n] * Y[n];
   return (Long) p;
 }
 
-int Vec_Greater_Than(Long *X, Long *Y, int i){	    /* return 1 iff `X > Y' */
-  while(i--) {if(X[i]>Y[i]) return 1; if(X[i]<Y[i]) return 0;} 
+ /* return 1 iff `X > Y' */
+int Vec_Greater_Than(Long *X, Long *Y, int i)
+{	   
+  while(i--) {
+    if(X[i]>Y[i]) return 1; 
+    if(X[i]<Y[i]) return 0;
+  } 
   return 0;
 }
 
@@ -252,40 +292,63 @@ void EL_to_PPL(EqList *_E, PolyPointList *_P, int *n){
 /*  ======================================================================  */
 
 /*	return 0 <=> max.dim., E.ne==P.n+1, made Simplex of Vertices of P;  *
- *      return (P.n-E.ne) == codim. > 0  <=> E.ne defining equations on E;  */
+ *  return (P.n-E.ne) == codim. > 0  <=> E.ne defining equations on E;  */
 
 #define  VERT_WITH_MAX_DISTANCE (0)    /* 0 @ [1845 2 15 97 247 610 874]    */
 #define	 LONG_EQ_FIRST		(0)    /* 0 @ [3425 2 7 137 429 1141 1709]  */
 #define	 TEST_GLZ_EQ		(0)		 /* trace StartSimplex EQs  */
 
 Long VZ_to_Base(Long *V,int *d,Long M[POLYDIM][POLYDIM])  /* 0 iff V=0 */
-{    int p[POLYDIM], i, j, J=0; Long g=0, W[POLYDIM], *G[POLYDIM]; 
-     for(i=0;i<*d;i++) 	if(V[i]) {W[J]=V[i]; G[J]=M[i]; p[J++]=i;}
-			else for(j=0;j<*d;j++) M[i][j]=(i==j);
-     if(J) if(p[0]) { G[0]=M[0]; for(j=0;j<*d;j++) M[p[0]][j]=(j==0);}
-     if(J>1) g=W_to_GLZ(W,&J,G); else if(J){g=*W; M[0][0]=0; M[0][p[0]]=1;}
-     if(J>1)
-     {  for(i=0;i<J;i++) { int I=J; 
-	for(j=*d-1;j>=0;j--) G[i][j] = (V[j]) ? G[i][--I] : 0; assert(I==0);}
-     }	return g;
+{    
+	int p[POLYDIM], i, j, J=0; 
+	Long g=0, W[POLYDIM], *G[POLYDIM]; 
+	
+    for(i=0;i<*d;i++) 
+    	if(V[i]){
+    		W[J]=V[i]; 
+    		G[J]=M[i]; 
+    		p[J++]=i;
+    	}
+		else for(j=0;j<*d;j++) M[i][j]=(i==j);
+		
+    if(J) if(p[0]) { G[0]=M[0]; for(j=0;j<*d;j++) M[p[0]][j]=(j==0);}
+    
+    if(J>1) g=W_to_GLZ(W,&J,G); 
+    else if(J){g=*W; M[0][0]=0; M[0][p[0]]=1;}
+    
+    if(J>1){  
+    	for(i=0;i<J;i++){ 
+    		int I=J; 
+			for(j=*d-1;j>=0;j--) G[i][j] = (V[j]) ? G[i][--I] : 0; 
+			assert(I==0);
+		}
+    }	
+    return g;
 }
 
-int  OrthBase_red_by_V(Long *V, int *d, Long A[][POLYDIM], int *r,
-	Long B[][POLYDIM])
-{    int i, j, k; Long W[POLYDIM], G[POLYDIM][POLYDIM];
-     for(i=0;i<*r;i++) {int j; W[i]=0; for(j=0;j<*d;j++) W[i]+=A[i][j]*V[j];}
-     assert( VZ_to_Base(W,r,G) );
-     for(i=0;i<*r-1;i++) for(k=0;k<*d;k++)
-     {	B[i][k]=0; for(j=0;j<*r;j++) B[i][k]+=G[i+1][j]*A[j][k];
-     }
-#if	(TEST_GLZ_EQ)
-	printf("A -> B ... V = "); for(k=0;k<*d;k++) printf(" %5d",V[k]);
-	printf("  W=");for(k=0;k<*r;k++)printf(" %5d",W[k]);puts(""); {int 
-	a,b; for(a=0;a<*r-1;a++){for(b=0;b<*d;b++)printf(" %5d",A[a][b]);
-	printf("  =A  B=  ");for(b=0;b<*d;b++)printf(" %5d",B[a][b]);
-	puts("");}for(b=0;b<*d;b++)printf(" %5d",A[a][b]);printf("  =A\n");}
-#endif
-     	return (*r)--;
+int  OrthBase_red_by_V(Long *V, int *d, Long A[][POLYDIM], int *r, Long B[][POLYDIM])
+{    
+	int i, j, k; 
+	Long W[POLYDIM], G[POLYDIM][POLYDIM];
+	
+    for(i=0;i<*r;i++) {int j; W[i]=0; for(j=0;j<*d;j++) W[i]+=A[i][j]*V[j];}
+    
+    assert(VZ_to_Base(W,r,G));
+    
+    for(i=0;i<*r-1;i++) for(k=0;k<*d;k++)
+    {	
+    	B[i][k]=0; for(j=0;j<*r;j++) B[i][k]+=G[i+1][j]*A[j][k];
+    }
+    
+	#if	(TEST_GLZ_EQ)
+		printf("A -> B ... V = "); for(k=0;k<*d;k++) printf(" %5d",V[k]);
+		printf("  W=");for(k=0;k<*r;k++)printf(" %5d",W[k]);puts(""); {int 
+		a,b; for(a=0;a<*r-1;a++){for(b=0;b<*d;b++)printf(" %5d",A[a][b]);
+		printf("  =A  B=  ");for(b=0;b<*d;b++)printf(" %5d",B[a][b]);
+		puts("");}for(b=0;b<*d;b++)printf(" %5d",A[a][b]);printf("  =A\n");}
+	#endif
+    
+    return (*r)--;
 }
 
 int  New_Start_Vertex(Long *V0,Long *Ea, PolyPointList *P,int *v) /* P.x[v] */
@@ -344,7 +407,8 @@ int  GLZ_Start_Simplex(PolyPointList *_P, VertexNumList *_V, CEqList *_C)
     	Long *Z=_P->x[i]; 	
 		if(Vec_Greater_Than(X,Z,_P->n)) X=_P->x[x=i];	/* (x_n)-max: VN[0] */
 		if(Vec_Greater_Than(Z,Y,_P->n)) Y=_P->x[y=i];	/* (x_n)-min: VN[1] */
-    }	assert(x!=y);	     /* at this point I need two different vertices */\
+    }	
+    assert(x!=y);	     /* at this point I need two different vertices */\
      
     for(i=0;i<*d;i++){	
     	Long Xi=(X[i]>0) ? X[i]: -X[i],
