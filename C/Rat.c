@@ -121,32 +121,58 @@ Long REgcd(Long *Vin, int *_n, Long *Vout)  /*  recursive Egcd(a_1,...,a_n)  */
  *   their diagonal entries are positive if all W[i] are positive.	    *
  *   GLZ has to be an initialized list of pointers. 	 returns gcd(W_i)   *
  *									    */
-Long FloorQ(Long N,Long D)				/*  F <= N/D < F+1  */
-{    Long F; if(D<0) {D=-D; N=-N;} F=N/D; return (F*D>N) ? F-1 : F; 
+/*  F <= N/D < F+1  */
+Long FloorQ(Long N,Long D)				
+{    
+	Long F; 
+	if(D<0) {D=-D; N=-N;} 
+	F=N/D; 
+	return (F*D>N) ? F-1 : F; 
 }
-Long CeilQ(Long N,Long D) { return -FloorQ(-N,D); }
+
+Long CeilQ(Long N,Long D)
+{ 
+	return -FloorQ(-N,D); 
+}
+
 Long RoundQ(Long N,Long D)
-{    Long F; if(D<0) {D=-D; N=-N;} F=N/D; return F+(2*(N-F*D))/D; 
+{    
+	Long F; 
+	if(D<0) {D=-D; N=-N;} 
+	F=N/D; 
+	return F+(2*(N-F*D))/D; 
 }
+
 Long W_to_GLZ(Long *W, int *d, Long **GLZ)		
-{    int i, j; Long G, *E=*GLZ, *B=GLZ[1]; for(i=0;i<*d;i++) assert(W[i]!=0);
-     for(i=1;i<*d;i++)for(j=0;j<*d;j++)GLZ[i][j]=0;
-     G=Egcd(W[0],W[1],&E[0],&E[1]); B[0]=-W[1]/G; B[1]=W[0]/G;
-     for(i=2;i<*d;i++)                   
-     {  Long a, b, g=Egcd(G,W[i],&a,&b); B=GLZ[i];
-        B[i]= G/g; G=W[i]/g; for(j=0;j<i;j++) B[j]=-E[j]*G;  /* B=Base-Line */
+{    
+	int i, j; 
+	Long G, *E=*GLZ, *B=GLZ[1]; 
+	for(i=0;i<*d;i++) assert(W[i]!=0);
+    for(i=1;i<*d;i++)for(j=0;j<*d;j++)GLZ[i][j]=0;
+    G=Egcd(W[0],W[1],&E[0],&E[1]); 
+    B[0]=-W[1]/G; 
+    B[1]=W[0]/G;
+    for(i=2;i<*d;i++){  
+    	Long a, b, g=Egcd(G,W[i],&a,&b); 
+    	B=GLZ[i];
+        B[i]= G/g; 
+        G=W[i]/g; 
+        for(j=0;j<i;j++) B[j]=-E[j]*G;  /* B=Base-Line */
         for(j=0;j<i;j++) E[j]*=a;
-	E[j]=b;                     /* next Egcd */
-        for(j=i-1;0<j;j--)                         /* I M P R O V E M E N T */
-	{   int n; Long *Y=GLZ[j], rB=RoundQ(B[j],Y[j]), rE=RoundQ(E[j],Y[j]);
-	/*  rB=CeilQ(B[j],Y[j]), rE=CeilQ(E[j],Y[j]);			*/
-	/*  printf(" [%d/%d -> %d] ",(int)B[j],(int)Y[j],(int)rB);
-	    printf(" [%d/%d -> %d] ",(int)E[j],(int)Y[j],(int)rE); 	*/
-            for(n=0;n<=j;n++) { B[n] -= rB*Y[n]; E[n] -= rE*Y[n]; } 
-	}   G=g;
+		E[j]=b;                     /* next Egcd */
+        for(j=i-1;0<j;j--){   
+        	int n; 
+        	Long *Y=GLZ[j], rB=RoundQ(B[j],Y[j]), rE=RoundQ(E[j],Y[j]);
+            for(n=0;n<=j;n++){ 
+            	B[n] -= rB*Y[n]; 
+            	E[n] -= rE*Y[n]; 
+            } 
+		}   
+		G=g;
      } 
      return G;
 }
+
 /*   Map Permutations: Do "ArgFun" for all permutations pi of *d elements */
 #ifdef	__cplusplus
 #define ARG_FUN		void (*ArgFun)(int *d,int *pi,int *pinv,void *info)
@@ -282,4 +308,3 @@ LLong LREgcd(LLong *Vin, int *_n, LLong *Vout)  /*  recursive LEgcd(a_1,...,a_n)
      return gcd;
 }
 /*  ==========	   END of (Extended) Greatest Common Divisor	 =========  */
-
