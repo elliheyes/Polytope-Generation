@@ -73,7 +73,7 @@ struct bitlist pts2bts(struct pointlist pl)
   struct binary bin;
     
   bl.len = MAXNVRTS*POLYDIM*BINLEN;
-
+  
   for(i=0; i < pl.len; i++){
     for(j=0; j < POLYDIM; j++){
       num = pl.points[i][j];
@@ -279,7 +279,7 @@ void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cu
 }  
 
 
-/* compare two bistlist by their fitness */
+/* compare two bitlists by their fitness */
 int compbitlist(const void *p1, const void *p2)
 {
   const struct bitlist *bl1=p1, *bl2=p2;
@@ -290,16 +290,16 @@ int compbitlist(const void *p1, const void *p2)
 }  
 
 
-/* decide if two bistlist are identical */
-int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
+/* decide if two pointlists are identical */
+int pointlistsequal(struct pointlist pl1, struct pointlist pl2)
 {
   int i, equal;
   
-  if (bl1.len != bl2.len) return 0;
+  if (pl1.len != pl2.len) return 0;
   else {
     equal=1; i=0;
-    while (equal && i<bl1.len) {
-      equal = equal && (bl1.bits[i]==bl2.bits[i]);
+    while (equal && i<pl1.len) {
+      equal = equal && (pl1.points[i]==pl2.points[i]);
       i++;
     }
     return equal;
@@ -307,22 +307,16 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
 }
 
 
-/* decide if two bistlist are equivalent by comparing their normal forms */
-int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
+/* decide if two pointlists are equivalent by comparing their normal forms */
+int pointlistsequiv(struct pointlist pl1, struct pointlist pl2)
 {
   int i, j, equal;
-  struct pointlist pl1, pl2;
   VertexNumList V01, V02;
   EqList *E01 = (EqList *) malloc(sizeof(EqList)),
          *E02 = (EqList *) malloc(sizeof(EqList));
   PolyPointList *_P01 = (PolyPointList *) malloc(sizeof(PolyPointList)),
    				*_P02 = (PolyPointList *) malloc(sizeof(PolyPointList));
   int IP1, IP2;
-  
-  
-  /* transform the bitlists into point lists */
-  pl1 = bts2pts(bl1);
-  pl2 = bts2pts(bl2);
   
   /* define the number polytope dimension */
   _P01->n=POLYDIM; _P02->n=POLYDIM; 
@@ -374,20 +368,16 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
     
     return equal;
   }
-  
 }
 
 
-/* write bitlist to a file in the format of the list of vertices  */
-void fprintbitlist(FILE * fp, struct bitlist bl)
+/* write pointlist to a file  */
+void fprintpointlist(FILE * fp, struct pointlist pl)
 {
   int i,j,IP;
-  struct pointlist pl;
   VertexNumList V;
   EqList *E = (EqList *) malloc(sizeof(EqList));
   PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
-  
-  pl = bts2pts(bl);
   
   _P->n=POLYDIM; 
   _P->np=pl.len; 
