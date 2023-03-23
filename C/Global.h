@@ -21,10 +21,10 @@
 #define LLong long long
 
 
-#define MIN -31	          /* lower bound on integers considered for points */
+#define MIN -15			  /* lower bound on integers considered for points */
 #define MAXNVRTS 5  	  /* maximum number of vertices */
-#define POLYDIM 4	  /* dimension of polytopes */
-#define BINLEN 6          /* maximum length of binary number */
+#define POLYDIM 4		  /* dimension of polytopes */
+#define BINLEN 5		  /* maximum length of binary number */
 #define POPSIZE 200       /* population size */
 #define NUMGEN 200        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
@@ -54,7 +54,6 @@
 #define H22 1
 #define EULER_WEIGHT 0 /* if >0 slows down computation */
 #define EULER 1
-#define FIB_WEIGHT 1 
 
 
 #define POINT_Nmax 2000000         /* maximum number of points */
@@ -138,8 +137,6 @@ these routines are designed to simulate the above definitions.
 
 /*  ============           	S T R U C T U R E S              ============  */
 
-
-
 struct binary
 {
   int list[BINLEN];  /* the actual binary list */
@@ -147,16 +144,16 @@ struct binary
 
 struct pointlist
 {
-  int len;                    /* the number of points */
+  int len;                        /* the number of points */
   int points[MAXNVRTS][POLYDIM];  /* the actual point list */
 };
 
 struct bitlist
 {
-  int len;                            /* number of bits in bitlist */
-  int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
-  float fitness;                      /* fitness of bitlist */
-  int terminal;                       /* terminal or not */
+  int len;                             /* number of bits in bitlist */
+  int bits[MAXNVRTS*POLYDIM*BINLEN];   /* the actual bitlist */
+  float fitness;                       /* fitness of bitlist */
+  int terminal;                        /* terminal or not */
 };
 
 struct population
@@ -167,18 +164,6 @@ struct population
   int nterm;                   /* number of terminal states in population */
   struct bitlist bl[POPSIZE];  /* the actual population */
 };  
-
-struct shortlist
-{
-  Long S1[POINT_Nmax][POLYDIM];      /* the S1 list */
-  Long S2[POINT_Nmax][POLYDIM];      /* the S2 list */
-  Long S3[POINT_Nmax][POLYDIM];      /* the S3 list */
-};
-
-struct slist
-{
-  int list[3];      /* the s list */
-};
 
 typedef struct {int n, np; Long x[POINT_Nmax][POLYDIM];} PolyPointList;
 /*
@@ -269,7 +254,7 @@ int randomint(int min, int max);
 int randomchoice(float p[POPSIZE], int len);
 
 /* write a bitlist bl to a file with file pointer fp */
-void fprintbitlist(FILE *fp, struct bitlist bl);
+void fprintpointlist(FILE *fp, struct pointlist pl);
 
 /* flips bit in position pos for a bitlist bl */
 void flipbit(struct bitlist *bl, int pos);
@@ -292,11 +277,11 @@ struct bitlist randomstate();
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2);
 
-/* decide if two bistlist are identical */
-int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
+/* decide if two pointlists are identical */
+int pointlistsequal(struct pointlist pl1, struct pointlist pl2);
 
-/* decide if two bistlist describe equivalent polytopes */
-int bitlistsequiv(struct bitlist bl1, struct bitlist bl2);
+/* decide if two pointlists describe equivalent polytopes */
+int pointlistsequiv(struct pointlist pl1, struct pointlist pl2);
   
   
   
@@ -340,17 +325,18 @@ struct population * evolvepop(struct population initialpop, int numgen, int meth
 void monitorevol(int gen, struct population *pop);
 
 /* select terminal states from a population */
-struct bitlist * termstates(struct population *evol, int numgen, int *numterm);
+struct pointlist * termstates(struct population *evol, int numgen, int *numterm);
 
 /* remove redundqncy in list of bitlists */
-void removeredundancy(struct bitlist *bl, int *len);
+void removeredundancy(struct pointlist *pl, int *len);
 
 /* select terminal states from a population and remove redundancy */
-struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm);
-
+struct pointlist * termstatesred(struct population *evol, int numgen, int *numterm);
+			   
 /* repeated evolution of a random initial population, extracting terminal states */
-struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
+struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm);
+
 
 
 
@@ -433,8 +419,6 @@ int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI);
 Fast computation of FaceInfo and Hodge numbers.
 */
 
-
-
 /*  ============             N O R M A L   F O R M                ============  */
 
 
@@ -454,12 +438,3 @@ the normal form coordinates NF of the vertices,
 the number of symmetries of the vertex pairing matrix
     (this number is the return value of Make_Poly_Sym_NF).
 */
-
-
-
-/*  ============             F I B R A T I O N                ============  */
-
-
-
-/* determine if there exists an elliptic fibration */
-int fibration(PolyPointList *_P, VertexNumList *_V);
