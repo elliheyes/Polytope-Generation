@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	            	==========  */
+/*  ==========	     			   	  	     	==========  */
 /*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -52,10 +52,10 @@ void monitorevol(int gen, struct population *pop)
 
 
 /* select terminal states from a population */
-struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
+struct pointlist * termstates(struct population *evol, int numgen, int *numterm)
 {
   int i,j, k;
-  struct bitlist *bl;
+  struct pointlist *pl;
   
   /* find the number of terminal states */
   *numterm=0;
@@ -66,22 +66,23 @@ struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
       }
  
    /* allocate memory for terminal states */
-  bl = calloc(*numterm,sizeof(struct bitlist)); 
+  pl = calloc(*numterm,sizeof(struct pointlist)); 
 
   /* store terminal states in allocated space */
   j=0;
   for (k=0; k<numgen; k++)
     for (i=0; i<evol[k].size; i++) 
       if ((evol[k].bl)[i].terminal){
-	    bl[j]=(evol[k].bl)[i]; j++;
+	    pl[j]=bts2pts((evol[k].bl)[i]); 
+	    j++;
       }
 				 
-   return bl;
+   return pl;
 }
 
 
 /* remove equality and equivalence redundancy in list of bitlists */
-void removeredundancy(struct bitlist *bl, int *len)
+void removeredundancy(struct pointlist *pl, int *len)
 {
   /* remove equality redundancy */
   int cnonred, cactive, red, k; 
@@ -90,17 +91,17 @@ void removeredundancy(struct bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-        if (bitlistsequal(bl[k],bl[cactive])) red=1;
+        if (pointlistsequal(pl[k],pl[cactive])) red=1;
         k++;
       }
       if (!red) {
-	    bl[cnonred]=bl[cactive];
+	    pl[cnonred]=pl[cactive];
 	    cnonred++;
 	  }
       cactive++;
     }
     *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
+    qsort(pl,cnonred,sizeof(struct pointlist),compbitlist);
   }
   
   /* remove equivalence redundancy */
@@ -109,43 +110,71 @@ void removeredundancy(struct bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
+        if (pointlistsequiv(pl[k],pl[cactive])) red=1;
         k++;
       }
       if (!red) {
-	    bl[cnonred]=bl[cactive];
+	    pl[cnonred]=pl[cactive];
 	    cnonred++;
 	  }
       cactive++;
     }
     *len=cnonred;
-    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
+    qsort(pl,cnonred,sizeof(struct pointlist),compbitlist);
   }
 }
 
 
-/* select terminal states from a population and remove redundancy */
-struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm)
+/* select terminal states from a population add mirror duals and remove redundancy */
+struct pointlist * termstatesred(struct population *evol, int numgen, int *numterm)
 {
-  struct bitlist *bl;
+  int i,j,k,IP;
+  struct pointlist pl, *pl1, *pl2;
 
   /* extract terminal states */
-  bl=termstates(evol,numgen,numterm);
+  pl1=termstates(evol,numgen,numterm);
   
+  /* add mirror duals */
+  pl2 = calloc(2*(*numterm),sizeof(struct pointlist));
+  for(i=0; i<*numterm; i++){
+  	pl2[i*2] = pl1[i];
+  
+    VertexNumList V;
+    EqList *E = (EqList *) malloc(sizeof(EqList));
+    PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
+
+    _P->n=POLYDIM; 
+    _P->np=pl1[i].len; 
+    for(j=0; j<pl1[i].len; j++) for(k=0; k<POLYDIM; k++) _P->x[j][k]=pl1[i].points[j][k];
+      
+    IP=Find_Equations(_P,&V,E);
+      
+    pl.len=E->ne;
+    for(j=0; j<E->ne; j++) for(k=0; k<POLYDIM; k++) pl.points[j][k]=E->e[j].a[k];
+      
+    pl2[i*2+1]=pl;
+      
+    free(E);free(_P);
+  } 
+  
+  *numterm = 2*(*numterm);
+  
+  free(pl1);
+    
   /* remove redundancy in the list of terminal states */
-  removeredundancy(bl,numterm);
+  removeredundancy(pl2,numterm);
   
-  return bl;
+  return pl2;
 }  
 
 
 /* repeated evolution of a random initial population, extracting terminal states */
-struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
+struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm)
 {
-  int i, crun, cevol, n1, n2, nterm1, nterm2;
+  int i, j, k, IP, crun, cevol, n1, n2, nterm1, nterm2;
   struct population *evol;
-  struct bitlist *bl, *blterm1, *blterm2, *bltermOld1, *bltermOld2;
+  struct pointlist *pl, *plterm1, *plterm2, *pltermOld1, *pltermOld2;
 
   /* main loop over runs */
   nterm1=0;
@@ -158,54 +187,54 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
       /* evolve random population */
       evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
       
-      /* extract terminal states and remove redundancy */
-      bl=termstatesred(evol,numgen,&n2);
+      /* extract terminal states add mirror duals and remove redundancy */
+      pl=termstatesred(evol,numgen,&n2);
       nterm2=nterm2+n2;
       
       /* allocate or re-allocate memory for terminal states */
       if(cevol==0) {
-        blterm2=calloc(nterm2,sizeof(struct bitlist));
+        plterm2=calloc(nterm2,sizeof(struct pointlist));
       }
       else{
         if(n2!=0){
-            bltermOld2=calloc(nterm2 - n2,sizeof(struct bitlist));;
-            for (i=0; i< nterm2 - n2; i++) bltermOld2[i]=blterm2[i];
-            free(blterm2);
-            blterm2=calloc(nterm2,sizeof(struct bitlist));
-            for (i=0; i< nterm2 - n2; i++) blterm2[i]=bltermOld2[i];
-            free(bltermOld2);
+            pltermOld2=calloc(nterm2 - n2,sizeof(struct pointlist));;
+            for (i=0; i< nterm2 - n2; i++) pltermOld2[i]=plterm2[i];
+            free(plterm2);
+            plterm2=calloc(nterm2,sizeof(struct pointlist));
+            for (i=0; i< nterm2 - n2; i++) plterm2[i]=pltermOld2[i];
+            free(pltermOld2);
         }
       }
     
       /* load in new terminal states */
-      for (i=0; i<n2; i++) blterm2[(nterm2)-n2+i]=bl[i];
+      for (i=0; i<n2; i++) plterm2[nterm2-n2+i]=pl[i];
 
 	  /* free allocated memory */ 
-      free(bl);free(evol);
+      free(pl);free(evol);
     }
     n1=nterm2;
     nterm1=nterm1+n1;
     
     /* allocate or re-allocate memory for terminal states */
     if(crun==0){
-      blterm1=calloc(nterm1,sizeof(struct bitlist));
+      plterm1=calloc(nterm1,sizeof(struct pointlist));
     }
     else{
       if(n1!=0){
-        bltermOld1=calloc(nterm1 - n1,sizeof(struct bitlist));;
-        for (i=0; i< nterm1 - n1; i++) bltermOld1[i]=blterm1[i];
-        free(blterm1);
-        blterm1=calloc(nterm1,sizeof(struct bitlist));
-        for (i=0; i< nterm1 - n1; i++) blterm1[i]=bltermOld1[i];
-        free(bltermOld1);
+        pltermOld1=calloc(nterm1 - n1,sizeof(struct pointlist));;
+        for (i=0; i< nterm1 - n1; i++) pltermOld1[i]=plterm1[i];
+        free(plterm1);
+        plterm1=calloc(nterm1,sizeof(struct pointlist));
+        for (i=0; i< nterm1 - n1; i++) plterm1[i]=pltermOld1[i];
+        free(pltermOld1);
       }
     }
     
     /* load in new terminal states */
-    for (i=0; i<n1; i++) blterm1[(nterm1)-n1+i]=blterm2[i];
-    
+    for (i=0; i<n1; i++) plterm1[(nterm1)-n1+i]=plterm2[i];
+      
     /* remove redundancy on set */
-    removeredundancy(blterm1,&nterm1);
+    removeredundancy(plterm1,&nterm1);
     
     /* monitor */
     if (monitor) {
@@ -222,5 +251,5 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
   
   *numterm = nterm1;
 
-  return blterm1; 
+  return plterm1; 
 }
