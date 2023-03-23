@@ -1,5 +1,5 @@
-#include "Global.h"
-#include "Rat.h"
+#include "Global_4d_5v.h"
+#include "Rat_4d_5v.h"
 
 #define SL_Long		LLong		   
 
@@ -52,7 +52,7 @@ int  Aux_Make_Poly_NF(Long X[][VERT_Nmax], int *n, int *nv)
      	for(i=0;i<*n;i++)for(j=0;j<*nv;j++)XS[i][j]=X[i][j];
      	x=GLZ_Make_Trian_NF(X,n,nv,G); 
      	SL2Z_Make_Poly_NF(XS,n,nv,S);
-     	for(i=0;i<*n;i++)for(j=0;j<*n;j++)  assert( S[i][j]==G[i][j]);}
+     	for(i=0;i<*n;i++)for(j=0;j<*n;j++)  assert(S[i][j]==G[i][j]);}
      	for(i=0;i<*n;i++)for(j=0;j<*nv;j++) assert(XS[i][j]==X[i][j]);
 		return x;
 	#else
@@ -77,9 +77,13 @@ GL_Long GL_RoundQ(GL_Long N,GL_Long D)
 
 GL_Long GL_W_to_GLZ(GL_Long *W, int d, GL_Long **GLZ)		
 {    
-	int i, j; GL_Long G, *E=*GLZ, *B=GLZ[1];for(i=0;i<d;i++)assert(W[i]!=0);
+	int i, j; 
+	GL_Long G, *E=*GLZ, *B=GLZ[1];
+	for(i=0;i<d;i++)assert(W[i]!=0);
     for(i=1;i<d;i++)for(j=0;j<d;j++)GLZ[i][j]=0;
-    G=GL_Egcd(W[0],W[1],&E[0],&E[1]); B[0]=-W[1]/G; B[1]=W[0]/G;
+    G=GL_Egcd(W[0],W[1],&E[0],&E[1]); 
+    B[0]=-W[1]/G; 
+    B[1]=W[0]/G;
     for(i=2;i<d;i++){  
     	GL_Long a, b, g=GL_Egcd(G,W[i],&a,&b); 
     	B=GLZ[i];
@@ -652,4 +656,3 @@ int  SL2Z_Make_Poly_NF(Long X[][VERT_Nmax], int *n, int *nv, SL_Long S[POLYDIM][
      }
      return 1;
 }
-
