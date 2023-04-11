@@ -1,0 +1,31 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Reflexive Polytope Genetic Algorithm
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Yang-Hui
+    family-names: He
+    email: yh@lims.ac.uk
+    affiliation: London Institute for Mathematical Sciences
+  - given-names: Elli
+    family-names: Heyes
+    email: elli.heyes@city.ac.uk
+    affiliation: 'City, University of London'
+  - given-names: 'Edward '
+    family-names: Hirst
+    affiliation: 'Queen Mary, University of London'
+    email: e.hirst@qmul.ac.uk
+  - given-names: Per
+    family-names: Berglund
+    email: per.berglund@unh.edu
+    affiliation: University of New Hampshire
+  - given-names: Vishnu
+    family-names: Jejjala
+    email: v.jejjala@wits.ac.za
+    affiliation: University of the Witwatersrand
+repository-code: 'https://github.com/elliheyes/Polytope-Generation'
