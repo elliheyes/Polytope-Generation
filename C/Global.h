@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	       	==========  */
+/*  ==========	     			   	  	      	==========  */
 /*  ==========                    G L O B A L                   ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -21,12 +21,12 @@
 #define LLong long long
 
 
-#define MIN -15	          /* lower bound on integers considered for points */
+#define MIN -3	          /* lower bound on integers considered for points */
 #define MAXNVRTS 6  	  /* maximum number of vertices */
 #define POLYDIM 5         /* dimension of polytopes */
-#define BINLEN 5	  /* maximum length of binary number */
-#define POPSIZE 500       /* population size */
-#define NUMGEN 300        /* number of generations */
+#define BINLEN 3          /* maximum length of binary number */
+#define POPSIZE 350       /* population size */
+#define NUMGEN 500        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -42,7 +42,7 @@
 #define IP_WEIGHT 1 
 #define NVERTS_WEIGHT 0
 #define NVERTS 6
-#define NPTS_WEIGHT 0 /* if >0 slows down computation */
+#define NPTS_WEIGHT 1 /* if >0 slows down computation */
 #define NPTS 7
 #define H11_WEIGHT 0 /* if >0 slows down computation */
 #define H11 1
@@ -144,16 +144,16 @@ struct binary
 
 struct pointlist
 {
-  int len;                        /* the number of points */
+  int len;                    /* the number of points */
   int points[MAXNVRTS][POLYDIM];  /* the actual point list */
 };
 
 struct bitlist
 {
-  int len;                             /* number of bits in bitlist */
-  int bits[MAXNVRTS*POLYDIM*BINLEN];   /* the actual bitlist */
-  float fitness;                       /* fitness of bitlist */
-  int terminal;                        /* terminal or not */
+  int len;                        /* number of bits in bitlist */
+  int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
+  float fitness;                  /* fitness of bitlist */
+  int terminal;                   /* terminal or not */
 };
 
 struct population
@@ -254,7 +254,7 @@ int randomint(int min, int max);
 int randomchoice(float p[POPSIZE], int len);
 
 /* write a bitlist bl to a file with file pointer fp */
-void fprintpointlist(FILE *fp, struct pointlist pl);
+void fprintbitlist(FILE *fp, struct bitlist bl);
 
 /* flips bit in position pos for a bitlist bl */
 void flipbit(struct bitlist *bl, int pos);
@@ -277,11 +277,11 @@ struct bitlist randomstate();
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2);
 
-/* decide if two pointlists are identical */
-int pointlistsequal(struct pointlist pl1, struct pointlist pl2);
+/* decide if two bistlist are identical */
+int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
 
-/* decide if two pointlists describe equivalent polytopes */
-int pointlistsequiv(struct pointlist pl1, struct pointlist pl2);
+/* decide if two bistlist describe equivalent polytopes */
+int bitlistsequiv(struct bitlist bl1, struct bitlist bl2);
   
   
   
@@ -325,17 +325,19 @@ struct population * evolvepop(struct population initialpop, int numgen, int meth
 void monitorevol(int gen, struct population *pop);
 
 /* select terminal states from a population */
-struct pointlist * termstates(struct population *evol, int numgen, int *numterm);
+struct bitlist * termstates(struct population *evol, int numgen, int *numterm);
 
 /* remove redundqncy in list of bitlists */
-void removeredundancy(struct pointlist *pl, int *len);
+void removeredundancy(struct bitlist *bl, int *len);
 
 /* select terminal states from a population and remove redundancy */
-struct pointlist * termstatesred(struct population *evol, int numgen, int *numterm);
+struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm);
 			   
 /* repeated evolution of a random initial population, extracting terminal states */
-struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
+struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm);
+
+
 
 
 /*  ============             F I T N E S S               ============  */
