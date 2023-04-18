@@ -5,7 +5,7 @@ This package is designed to generate reflexive polytopes of a certain type using
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
 
-Installation:
+# Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
 - Step 1: Download the zipped file for this package from GitHub.
@@ -15,7 +15,7 @@ To install this package and use it on your own machine follow these simple steps
 - Step 5: To run the main function within the gen_poly.c file simply type './gen_poly.x' and hit Enter. 
 
 
-General Notes:
+# General Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
   extract the terminal states (i.e. reflexive polytopes), reduce the list using the normal form,
   and repeat this several times. The reduced list of output reflexive polytopes are written to a file 
