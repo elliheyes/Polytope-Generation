@@ -4,6 +4,7 @@ This package is designed to generate reflexive polytopes of a certain type using
 
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
+
 Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
@@ -13,16 +14,23 @@ To install this package and use it on your own machine follow these simple steps
 - Step 4: Type 'make' and hit Enter. This should compile all the necessary files in the package.
 - Step 5: To run the main function within the gen_poly.c file simply type './gen_poly.x' and hit Enter. 
 
-Notes:
-- Currently the main function in the gen_poly.c is set to randomly initialise a population, evolve it, 
-  extract the terminal states (i.e. reflexive polytopes), reduce the list using the normal form,
-  and then write the reduced list of terminal states to a file.
-  
-- You can change the global variables in the 'Global.h' file. This includes the polytope
-  variables like the polytope dimension, the number of points, etc and also the 
-  genetic algorithm variables like the number of generations, population size, etc.
 
-- The fitness weights, which are defined in the 'Global.h' file, define what is meant
+General Notes:
+- Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
+  extract the terminal states (i.e. reflexive polytopes), reduce the list using the normal form,
+  and repeat this several times. The reduced list of output reflexive polytopes are written to a file 
+  and the number of terminal states generated after each evolution, plus the total number of reduced
+  terminal states are also written to a file.
+  
+- To specify the type of reflexive polytopes you would like to generate, such as the polytope dimension,
+  number of points, etc, one can change the global variables in the Global.h file accordingly. 
+  Here one can also change the global genetic algorithm variables like the number of generations, 
+  population size, mutation rate etc. In fact, in order to find the best performance one usually needs to
+  play around with these variables quite a bit. 
+  
+  
+
+- The fitness weights, which are defined in the Global.h file, define what is meant
   by a terminal state.
     
   x DIST_WEIGHT: if this is > 0 then a penalty is added to the fitness for the average 
