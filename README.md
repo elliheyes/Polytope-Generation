@@ -63,34 +63,50 @@ On top of these two main components there are additional components one can incl
 search for reflexive polytopes with specific properties. To turn on these additional components, amend the global
 parameters Global.h accordingly.
 
-  x NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
+-   NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
     does not have NVERTS number of vertices. This causes the genetic algorithm to generate 
     polytopes of a given number of vertices.
     
-  x NPOINTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
+-   NPOINTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
     does not have NPTS number of points. This causes the genetic algorithm to generate polytopes 
     of a given number of points.
     
-  x H11_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope does
+-   H11_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope does
     not have a h11 hodge number equal to H11. This causes the genetic algorithm to generate polytopes 
     of a given hodge number. Similarly for H12_WEIGHT, H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
 
 
 # evolution.c
 
+The functions in this file evolve an intitial population for a number of generations, extract the terminal states from a
+population list, and remove the redundancy in a list of terminal states. These searchenv function is the main function 
+of this package that repeatedly evolves an initial population, extracts terminal states, removes redundancy and saves the 
+information to a file.
+
 
 # Vertex.c
+
+The functions defined in this file, taken from PALP, construct a poltope from a list of integer vertex coordinates by taking
+the convex hull. It finds the bounding hyperplanes, the vertices, the full list of points, etc. 
 
 
 # Rat.c & Rat.h
 
 
+
 # Polynf.c
+
+The functions defined in this file, taken from PALP, allow one to compute the normal form of a polytope which is used to determine
+whether two polytopes are equivalent and therefore remove the degeneracy in a list of refelxive polytpoes. 
 
 
 # Global.h
 
+The global file defines the global parameters, data structures and prototypes for the various functions. 
+
 
 # gen_poly.c
+
+This file includes the main function.
     
 
