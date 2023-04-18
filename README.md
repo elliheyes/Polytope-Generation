@@ -50,33 +50,30 @@ fitness, and updating a population to the next generation.
 # fitness.c
 
 This file contains the fitness function of the genetic algorithm, which determines how close a bitlist 
-is from defining a reflexive polytope. There are several components of the fitness function that can be turned
+is from defining a reflexive polytope. 
+
+There are several components of the fitness function that can be turned
 on or off by the weight parameters. The two main components which should always remain on are the distance of 
 the facets from the origin and the IP property. Their associated weights are defined in Global.h as DIST_WEIGHT
-and IP_WEIGHT respectively.
+and IP_WEIGHT respectively. If DIST_WEIGHT > 0 then a penalty is added fitness for the average difference of the 
+distance of the facets from the origin and 1. If IP_WEIGHT > 0 then a penalty is added to the fitness if the polytope
+does not satisfy the interior point property.
 
-
-- The fitness weights, which are defined in the Global.h file, define what is meant
-  by a terminal state.
-    
-  x DIST_WEIGHT: if this is > 0 then a penalty is added to the fitness for the average 
-    distance of the facets from the origin.
-    
-  x IP_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
-    does not satisfy the interior point property.
+On top of these two main components there are additional components one can include in the fitness to direct the 
+search for reflexive polytopes with specific properties. To turn on these additional components, amend the global
+parameters Global.h accordingly.
 
   x NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
-    does not have NVERTS number of vertices. NVERTS is also defined in 'Global.h'. This 
-    causes the genetic algorithm to generate polytopes of a given number of vertices.
+    does not have NVERTS number of vertices. This causes the genetic algorithm to generate 
+    polytopes of a given number of vertices.
     
   x NPOINTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
-    does not have NPTS number of points. NPTS is also defined in 'Global.h'. This 
-    causes the genetic algorithm to generate polytopes of a given number of points.
+    does not have NPTS number of points. This causes the genetic algorithm to generate polytopes 
+    of a given number of points.
     
   x H11_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope does
-    not have a h11 hodge number equal to H11 (defined in 'Global.h'). This causes the 
-    genetic algorithm to generate polytopes of a given hodge number. Similarly for H12_WEIGHT,
-    H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
+    not have a h11 hodge number equal to H11. This causes the genetic algorithm to generate polytopes 
+    of a given hodge number. Similarly for H12_WEIGHT, H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
 
 
 # evolution.c
