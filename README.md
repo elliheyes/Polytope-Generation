@@ -5,7 +5,7 @@ This package is designed to generate reflexive polytopes of a certain type using
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
 Notes:
-- Currently the main function is set to randomly initialise a population, evolve it, 
+- Currently the main function in the gen_poly.c is set to randomly initialise a population, evolve it, 
   extract the terminal states (i.e. reflexive polytopes), reduce the list using the normal form,
   and then write the reduced list of terminal states to a file.
   
