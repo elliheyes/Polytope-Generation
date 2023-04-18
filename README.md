@@ -35,11 +35,25 @@ To install this package and use it on your own machine follow these simple steps
 
 # bitlist.c
 
+The functions defined in this file deal with bitlists, including converting a polytope defined by 
+integer vertex coordinates into a bitlist, generating a random bitlist state, determining whether 
+two bitlists define the same polytope, printing a bitlist to a file, etc.
+
 
 # population.c
 
+The functions defined in this file deal with populations of bitlists, for instance generating a random
+population, randomly the bitlists in a population mutating, ranking individuals in a population by their 
+fitness, and updating a population to the next generation.
+
 
 # fitness.c
+
+This file contains the fitness function of the genetic algorithm, which determines how close a bitlist 
+is from defining a reflexive polytope. There are several components of the fitness function that can be turned
+on or off by the weight parameters. The two main components which should always remain on are the distance of 
+the facets from the origin and the IP property. Their associated weights are defined in Global.h as DIST_WEIGHT
+and IP_WEIGHT respectively.
 
 
 - The fitness weights, which are defined in the Global.h file, define what is meant
