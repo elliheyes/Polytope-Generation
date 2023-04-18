@@ -1086,4 +1086,3 @@ int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI)
   
   return 1;
 }
-
