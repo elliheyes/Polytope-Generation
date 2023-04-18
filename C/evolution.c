@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	     	==========  */
+/*  ==========	     			   	  	    	==========  */
 /*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -168,13 +168,41 @@ struct pointlist * termstatesred(struct population *evol, int numgen, int *numte
 }  
 
 
+/* select new terminal states from a generated list */
+void newtermstates(struct pointlist * plOld, struct pointlist * plNew, int numtermOld, int len, int *numtermNew)
+{
+  int cnew, cactive, old, k;
+  
+  cnew=0; cactive=0;
+  while (cactive < len){
+    old=0; k=0; 
+    while (!old && k<numtermOld) {
+      if (pointlistsequal(plOld[k],plNew[cactive])) old=1;
+      else if (pointlistsequiv(plOld[k],plNew[cactive])) old=1;
+      k++;
+    }
+    if (!old) {
+	  plNew[cnew]=plNew[cactive];
+	  cnew++;
+	}
+    cactive++;
+  }
+  
+  *numtermNew=cnew;
+  qsort(plNew,cnew,sizeof(struct pointlist),compbitlist);
+}
+
+
 /* repeated evolution of a random initial population, extracting terminal states */
 struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
-			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm)
+			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm)
 {
   int i, j, k, IP, crun, cevol, n1, n2, nterm1, nterm2;
   struct population *evol;
   struct pointlist *pl, *plterm1, *plterm2, *pltermOld1, *pltermOld2;
+  
+  FILE * fp1 = fopen("5d_6v_Num_Terminal_States.txt","w");
+  FILE * fp2;
 
   /* main loop over runs */
   nterm1=0;
@@ -212,42 +240,58 @@ struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, i
 	  /* free allocated memory */ 
       free(pl);free(evol);
     }
-    n1=nterm2;
-    nterm1=nterm1+n1;
     
-    /* allocate or re-allocate memory for terminal states */
     if(crun==0){
+      /* remove redundancy */
+      removeredundancy(plterm2, &nterm2);
+      n1=nterm2;
+      nterm1=n1;
+    
+      /* allocate memory for terminal states */
       plterm1=calloc(nterm1,sizeof(struct pointlist));
     }
-    else{
+    else{ 
+      /* remove redundancy */
+      removeredundancy(plterm2, &nterm2);
+    
+      /* select new terminal states */
+      newtermstates(plterm1,plterm2,nterm1,nterm2,&n1);
+      nterm1=nterm1+n1;
+    
+      /* re-allocate memory for terminal states */
       if(n1!=0){
-        pltermOld1=calloc(nterm1 - n1,sizeof(struct pointlist));;
-        for (i=0; i< nterm1 - n1; i++) pltermOld1[i]=plterm1[i];
+        pltermOld1=calloc(nterm1-n1,sizeof(struct pointlist));;
+        for (i=0; i< nterm1-n1; i++) pltermOld1[i]=plterm1[i];
         free(plterm1);
         plterm1=calloc(nterm1,sizeof(struct pointlist));
-        for (i=0; i< nterm1 - n1; i++) plterm1[i]=pltermOld1[i];
+        for (i=0; i< nterm1-n1; i++) plterm1[i]=pltermOld1[i];
         free(pltermOld1);
       }
     }
     
     /* load in new terminal states */
     for (i=0; i<n1; i++) plterm1[(nterm1)-n1+i]=plterm2[i];
-      
-    /* remove redundancy on set */
-    removeredundancy(plterm1,&nterm1);
     
     /* monitor */
     if (monitor) {
       if (!(crun%10)) printf("   Run     #Term     #AllTerm\n");
-      printf("%6i    %6i    %6i\n",crun,n1,nterm1);
+      printf("%6i    %6i    %6i\n",crun,nterm2,nterm1);
       fflush(stdout);
     }
     
-    /* print to file */
-    fprintf(fp,"%d %d\n",nterm2,nterm1);
-    fflush(fp);
-
+    /* print number of terminal states to file */
+    fprintf(fp1,"%d %d\n",nterm2,nterm1);
+    fflush(fp1);
+    
+    /* print terminal states to file */
+    if (!(crun%10)){
+      fp2 = fopen("5d_6v_Terminal_States.txt","w");
+      for(i=0; i<nterm1; i++) fprintpointlist(fp2, plterm1[i]); 
+      fclose(fp2); 
+    }
   }
+  
+  fclose(fp1); 
   
   *numterm = nterm1;
 
