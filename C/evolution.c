@@ -172,7 +172,7 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
   struct population *evol;
   struct bitlist *bl, *blterm1, *blterm2, *bltermOld1, *bltermOld2;
   
-  FILE * fp1 = fopen("5d_7p_Num_Terminal_States.txt","w");
+  FILE * fp1 = fopen("Num_Terminal_States.txt","w");
   FILE * fp2;
 
   /* main loop over runs */
@@ -256,7 +256,7 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
     
     /* print terminal states to file */
     if (!(crun%10)){
-      fp2 = fopen("5d_7p_Terminal_States.txt","w");
+      fp2 = fopen("Terminal_States.txt","w");
       for(i=0; i<nterm1; i++) fprintbitlist(fp2, blterm1[i]); 
       fclose(fp2); 
     }
