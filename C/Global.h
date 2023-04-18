@@ -1,7 +1,7 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	                    	==========  */
+/*  ==========	     			   	  	       	==========  */
 /*  ==========                    G L O B A L                   ==========  */
-/*  ==========						                            ==========  */
+/*  ==========						        ==========  */
 /*  ======================================================================  */
 
 #include <stdio.h>
@@ -22,11 +22,11 @@
 
 
 #define MIN -15			  /* lower bound on integers considered for points */
-#define MAXNVRTS 5  	  /* maximum number of vertices */
-#define POLYDIM 4		  /* dimension of polytopes */
+#define MAXNVRTS 6  	  /* maximum number of vertices */
+#define POLYDIM 5		  /* dimension of polytopes */
 #define BINLEN 5		  /* maximum length of binary number */
-#define POPSIZE 200       /* population size */
-#define NUMGEN 200        /* number of generations */
+#define POPSIZE 500       /* population size */
+#define NUMGEN 300        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
@@ -335,9 +335,7 @@ struct pointlist * termstatesred(struct population *evol, int numgen, int *numte
 			   
 /* repeated evolution of a random initial population, extracting terminal states */
 struct pointlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
-			   int keepfitest, float mutrate, float alpha, int monitor, FILE * fp, int *numterm);
-
-
+			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm);
 
 
 /*  ============             F I T N E S S               ============  */
