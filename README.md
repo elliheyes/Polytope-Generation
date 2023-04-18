@@ -1,4 +1,4 @@
-# Polytope-Generation
+# Reflexive Polytope Generation
 
 This package is designed to generate reflexive polytopes of a certain type using a genetic algorithm. 
 
@@ -26,9 +26,21 @@ To install this package and use it on your own machine follow these simple steps
   number of points, etc, one can change the global variables in the Global.h file accordingly. 
   Here one can also change the global genetic algorithm variables like the number of generations, 
   population size, mutation rate etc. In fact, in order to find the best performance one usually needs to
-  play around with these variables quite a bit. 
+  play around with these variables quite a bit.  
+
+- The content in the files Polynf.c, Rat.c, Rat.h and Vertex.c have been copied from the source code of 
+  PALP software. More information on this package can be found on the website: http://hep.itp.tuwien.ac.at/~kreuzer/CY/.
   
-  
+- The content of the bitlist.c, evolution.c and population.c have been copied from ...
+
+# bitlist.c
+
+
+# population.c
+
+
+# fitness.c
+
 
 - The fitness weights, which are defined in the Global.h file, define what is meant
   by a terminal state.
@@ -51,5 +63,23 @@ To install this package and use it on your own machine follow these simple steps
     not have a h11 hodge number equal to H11 (defined in 'Global.h'). This causes the 
     genetic algorithm to generate polytopes of a given hodge number. Similarly for H12_WEIGHT,
     H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
+
+
+# evolution.c
+
+
+# Vertex.c
+
+
+# Rat.c & Rat.h
+
+
+# Polynf.c
+
+
+# Global.h
+
+
+# gen_poly.c
     
 
