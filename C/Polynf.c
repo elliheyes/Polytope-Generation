@@ -4,8 +4,8 @@
 #define SL_Long		LLong		   
 
 #define NFX_Limit       903		/* 138b->255  153e->279  165c->327 */
-#define X_Limit         9999		   /* 178c->375  218->399,462,483 */
-#define VPM_Limit	9999
+#define X_Limit         99999		   /* 178c->375  218->399,462,483 */
+#define VPM_Limit	99999
 
 #define TEST_GLZ_VS_SL	(0)		/* exit on difference: GL vs. SL */
 
