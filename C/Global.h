@@ -194,7 +194,7 @@ typedef Long PairMat[EQUA_Nmax][VERT_Nmax];
 The matrix whose entries are the pairings av+c between the vertices v and the equations (a,c).
 */
 
-typedef struct {int mp, mv, np, nv, n, pic, cor, h22, h1[POLYDIM-1];} BaHo;                                                                    BaHo;
+typedef struct {int mp, mv, np, nv, n, pic, cor, h22, h1[POLYDIM-1];} BaHo;                                                                   
 /*
 This structure is related to Batyrev's formulas for Hodge numbers.
 n     ... dimension of the polytope
