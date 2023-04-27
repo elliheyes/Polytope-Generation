@@ -19,10 +19,10 @@ struct population randompop(int popsize)
   pop.size=size;
 
   /* compute average and maximal fitness for random population */
-  pop.avfitness=avfitness(&pop);    /* average fitness in population */
+  pop.avfitness=avfitness(&pop);        /* average fitness in population */
   blfitest=fitestinpop(&pop);		/* fittest in population */
-  pop.maxfitness=blfitest.fitness;  /* maximal fitness in population */
-  pop.nterm=nterminalpop(&pop);     /* number of terminal state in mutated population */
+  pop.maxfitness=blfitest.fitness;      /* maximal fitness in population */
+  pop.nterm=nterminalpop(&pop);         /* number of terminal state in mutated population */
   
   return pop;
 }  
@@ -47,15 +47,15 @@ void mutatepop(struct population *pop, float mutrate)
 
   /* run over mutations */
   for (i=0; i<nmut; i++) {
-    pos=randomint(0,nbits);			    /* random bit position in entire population */
-    ipos=pos/len;       	     	    /* individual where mutation occurs */
-    bpos=pos%len;          			    /* bit position in individual */
+    pos=randomint(0,nbits);	        /* random bit position in entire population */
+    ipos=pos/len;       	     	/* individual where mutation occurs */
+    bpos=pos%len;                       /* bit position in individual */
     flipbit(&((pop->bl)[ipos]),bpos);	/* flip bit */
   }
   
   for (k=0; k<pop->size; k++) fitness(&((pop->bl)[k])); /* update fitness for mutated population */
   pop->avfitness=avfitness(pop);                        /* average fitness in mutated population */
-  blfitest=fitestinpop(pop);		                     /* fittest in population */
+  blfitest=fitestinpop(pop);		                /* fittest in population */
   pop->maxfitness=blfitest.fitness;                     /* maximal fitness in mutated population */
   pop->nterm=nterminalpop(pop);                         /* number of terminal state in mutated population */
   
