@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	     	==========  */
+/*  ==========	     			   	  	 	==========  */
 /*  ==========         B I T L I S T   F U N C T I O N S        ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -289,6 +289,41 @@ int compbitlist(const void *p1, const void *p2)
   else return 0;
 }  
 
+/* compute the normal form of a polytope from its bitlist */
+struct NormalForm normalform(struct bitlist bl)
+{
+  int i, j, IP, SymNum, VPMSymNum;
+  struct pointlist pl;
+  PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
+  VertexNumList V;
+  EqList *E = (EqList *) malloc(sizeof(EqList));
+  VPermList *VP = (VPermList*) malloc(sizeof(VPermList));
+  Long NF[POLYDIM][VERT_Nmax];
+  struct NormalForm NF0;
+  
+  /* transform the bitlists into point lists */
+  pl = bts2pts(bl);
+  
+  /* define the polytope dimension and the number of points */
+  _P->n=POLYDIM;
+  _P->np=pl.len; 
+  
+  /* fill in the points */
+  for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
+
+  /* find the bounding hyperplane equations of the polytope */
+  IP=Find_Equations(_P,&V,E); 
+
+  /* compute normal form */
+  VPMSymNum = Make_Poly_Sym_NF(_P, &V, E, &SymNum, VP->p, NF);
+  NF0.nv=V.nv; 
+  for (i=0; i<POLYDIM; i++) for(j=0; j<VERT_Nmax; j++) NF0.x[i][j]=NF[i][j];
+  
+  free(_P);free(E);free(VP);
+  
+  return NF0;
+}
+
 
 /* decide if two bistlist are identical */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
@@ -304,6 +339,30 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
     }
     return equal;
   } 
+}
+
+/* decide if two normal forms are equal */
+int NFsequal(struct NormalForm NF1, struct NormalForm NF2)
+{
+  int i, j, equal;
+  
+  /* check if the number of vertices match */
+  if (NF1.nv != NF2.nv) return 0;
+  
+  /* if number of vertices match, compare the normal form matrices */
+  else{
+    equal=1; 
+    for(i=0; i<POLYDIM; i++){
+      for(j=0; j<NF1.nv; j++){
+        if (NF1.x[i][j]!=NF2.x[i][j]){
+          equal = 0;
+          break;
+        } 
+      }
+      if (!equal) break;
+    }
+    return equal;
+  }
 }
 
 
@@ -324,27 +383,17 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
   pl1 = bts2pts(bl1);
   pl2 = bts2pts(bl2);
   
-  /* define the number polytope dimension */
+  /* define the polytope dimension and number of points */
   _P01->n=POLYDIM; _P02->n=POLYDIM; 
-    
-  /* define the number of points */
   _P01->np=pl1.len; _P02->np=pl2.len;
     
   /* define the points */
-  for(i=0; i<pl1.len; i++){
-    for(j=0; j<POLYDIM; j++){
-      _P01->x[i][j]=pl1.points[i][j];
-    }
-  } 
-  for(i=0; i<pl2.len; i++){
-    for(j=0; j<POLYDIM; j++){
-      _P02->x[i][j]=pl2.points[i][j];
-    }
-  } 
+  for(i=0; i<pl1.len; i++) for(j=0; j<POLYDIM; j++) _P01->x[i][j]=pl1.points[i][j];
+  for(i=0; i<pl2.len; i++) for(j=0; j<POLYDIM; j++) _P02->x[i][j]=pl2.points[i][j];
     
-  /* find the bounding hyperplane equations of the polytope */
-  IP1=Find_Equations(_P01,&V01,E01); 
-  IP2=Find_Equations(_P02,&V02,E02); 
+  /* find the bounding hyperplane equations of the polytopes */
+  IP1 = Find_Equations(_P01,&V01,E01); 
+  IP2 = Find_Equations(_P02,&V02,E02); 
   
   /* check if the number of vertices match */
   if (V01.nv != V02.nv){
@@ -355,19 +404,25 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
   	 return 0;
   }
   else {
-  	int SymNum1, SymNum2;
-  	int VPMSymNum1, VPMSymNum2;
-  	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)); 
-  	VPermList *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
+  	int SymNum1, SymNum2, VPMSymNum1, VPMSymNum2;
+  	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)),
+              *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
   	Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
+  	struct NormalForm NF01, NF02;
   
-    /* compute normal forms */
+    /* compute the normal forms of the polytopes */
 	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
     VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
-    
+    NF01.nv = V01.nv; NF02.nv = V02.nv; 
+    for (i=0; i<POLYDIM; i++){
+      for(j=0; j<VERT_Nmax; j++){
+         NF01.x[i][j]=NF1[i][j];
+         NF02.x[i][j]=NF2[i][j];
+      }
+    }
+        
    	/* compare the normal forms of the two polytopes */
-    equal=1; 
-    for(i=0; i<POLYDIM; i++) for(j=0; j<V01.nv; j++) equal = equal && (NF1[i][j]==NF2[i][j]);
+    equal = NFsequal(NF01, NF02); 
     
     /* free allocated memory */
     free(E01);free(E02);free(_P01);free(_P02);free(VP01);free(VP02); 
