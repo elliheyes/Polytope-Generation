@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	      	==========  */
+/*  ==========	     			   	  	        ==========  */
 /*  ==========                    G L O B A L                   ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -21,11 +21,11 @@
 #define LLong long long
 
 
-#define MIN -3	          /* lower bound on integers considered for points */
-#define MAXNVRTS 6  	  /* maximum number of vertices */
-#define POLYDIM 5         /* dimension of polytopes */
-#define BINLEN 3          /* maximum length of binary number */
-#define POPSIZE 350       /* population size */
+#define MIN -15	          /* lower bound on integers considered for points */
+#define MAXNVRTS 5  	  /* maximum number of vertices */
+#define POLYDIM 4         /* dimension of polytopes */
+#define BINLEN 5          /* maximum length of binary number */
+#define POPSIZE 200       /* population size */
 #define NUMGEN 500        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
 #define RANKING 0         /* macro for ranking method to select breeding pairs */
@@ -42,7 +42,7 @@
 #define IP_WEIGHT 1 
 #define NVERTS_WEIGHT 0
 #define NVERTS 6
-#define NPTS_WEIGHT 1 /* if >0 slows down computation */
+#define NPTS_WEIGHT 0 /* if >0 slows down computation */
 #define NPTS 7
 #define H11_WEIGHT 0 /* if >0 slows down computation */
 #define H11 1
@@ -144,16 +144,16 @@ struct binary
 
 struct pointlist
 {
-  int len;                    /* the number of points */
+  int len;                        /* the number of points */
   int points[MAXNVRTS][POLYDIM];  /* the actual point list */
 };
 
 struct bitlist
 {
-  int len;                        /* number of bits in bitlist */
+  int len;                            /* number of bits in bitlist */
   int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
-  float fitness;                  /* fitness of bitlist */
-  int terminal;                   /* terminal or not */
+  float fitness;                      /* fitness of bitlist */
+  int terminal;                       /* terminal or not */
 };
 
 struct population
@@ -164,6 +164,12 @@ struct population
   int nterm;                   /* number of terminal states in population */
   struct bitlist bl[POPSIZE];  /* the actual population */
 };  
+
+struct NormalForm
+{
+  int nv;                       /* the number of vertices */        
+  Long x[POLYDIM][VERT_Nmax];  /* the actual normal form vertex matrix */
+}; 
 
 typedef struct {int n, np; Long x[POINT_Nmax][POLYDIM];} PolyPointList;
 /*
@@ -277,6 +283,12 @@ struct bitlist randomstate();
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2);
 
+/* compute the normal form of a polytope from its bitlist */
+struct NormalForm normalform(struct bitlist bl);
+
+/* decide if two normal forms are equal */
+int NFsequal(struct NormalForm NF1, struct NormalForm NF2);
+
 /* decide if two bistlist are identical */
 int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
 
@@ -336,8 +348,6 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
 /* repeated evolution of a random initial population, extracting terminal states */
 struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm);
-
-
 
 
 /*  ============             F I T N E S S               ============  */
@@ -436,5 +446,5 @@ the number *SymNum of GL(n,Z)-symmetries of the polytope,
 the *SymNum vertex permutations V_perm realising these symmetries,
 the normal form coordinates NF of the vertices,
 the number of symmetries of the vertex pairing matrix
-    (this number is the return value of Make_Poly_Sym_NF).
+(this number is the return value of Make_Poly_Sym_NF).
 */
