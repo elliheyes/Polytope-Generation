@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	    	==========  */
+/*  ==========	     			   	  	       	==========  */
 /*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -136,32 +136,41 @@ struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm
   removeredundancy(bl,numterm);
   
   return bl;
-}  
+} 
 
 
 /* select new terminal states from a generated list */
-void newtermstates(struct bitlist * blOld, struct bitlist * blNew, int numtermOld, int len, int *numtermNew)
+void newtermstates(struct NormalForm * NFsOld, struct bitlist * blNew, int numtermOld, int len, int *numtermNew)
 {
   int cnew, cactive, old, k;
+  struct NormalForm NF;
   
   cnew=0; cactive=0;
   while (cactive < len){
+    /* compute the normal form of the new polytope */
+    NF = normalform(blNew[cactive]); 
+  
+    /* check whether normal form is in existing list */
     old=0; k=0; 
-    while (!old && k<numtermOld) {
-      if (bitlistsequal(blOld[k],blNew[cactive])) old=1;
-      else if (bitlistsequiv(blOld[k],blNew[cactive])) old=1;
+    while (!old && k<numtermOld){      
+      if (NFsequal(NFsOld[k],NF)) old=1;
       k++;
     }
+    
+    /* if normal form is not in existing list then bring it to the front of the list */
     if (!old) {
 	  blNew[cnew]=blNew[cactive];
+	  
+	  /* update index */
 	  cnew++;
-	}
+	}	
+	/* update index */
     cactive++;
   }
   
   *numtermNew=cnew;
   qsort(blNew,cnew,sizeof(struct bitlist),compbitlist);
-}
+} 
 
 
 /* repeated evolution of a random initial population, extracting terminal states */
@@ -171,9 +180,10 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
   int i, j, k, IP, crun, cevol, n1, n2, nterm1, nterm2;
   struct population *evol;
   struct bitlist *bl, *blterm1, *blterm2, *bltermOld1, *bltermOld2;
+  struct NormalForm *NFs, *NFsOld;
   
   FILE * fp1 = fopen("Num_Terminal_States.txt","w");
-  FILE * fp2;
+  FILE * fp2 = fopen("Terminal_States.txt","w");
 
   /* main loop over runs */
   nterm1=0;
@@ -220,28 +230,42 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
       
       /* allocate memory for terminal states */
       blterm1=calloc(nterm1,sizeof(struct bitlist));
+      
+      /* allocate memory for normal forms */
+      NFs=calloc(nterm1,sizeof(struct NormalForm));
     }
     else{
       /* remove redundancy */
       removeredundancy(blterm2, &nterm2);
       
       /* select new terminal states */
-      newtermstates(blterm1,blterm2,nterm1,nterm2,&n1);
+      newtermstates(NFs,blterm2,nterm1,nterm2,&n1);
       nterm1=nterm1+n1;
       
-      /* re-allocate memory for terminal states */
+      /* re-allocate memory for terminal states and normal forms */
       if(n1!=0){
-        bltermOld1=calloc(nterm1-n1,sizeof(struct bitlist));;
-        for (i=0; i< nterm1-n1; i++) bltermOld1[i]=blterm1[i];
-        free(blterm1);
+        bltermOld1=calloc(nterm1-n1,sizeof(struct bitlist));
+        NFsOld=calloc(nterm1-n1,sizeof(struct NormalForm));
+        for (i=0; i< nterm1-n1; i++){
+          bltermOld1[i]=blterm1[i];
+          NFsOld[i]=NFs[i];
+        };
+        free(blterm1);free(NFs);
         blterm1=calloc(nterm1,sizeof(struct bitlist));
-        for (i=0; i< nterm1-n1; i++) blterm1[i]=bltermOld1[i];
-        free(bltermOld1);
+        NFs=calloc(nterm1,sizeof(struct NormalForm));
+        for (i=0; i< nterm1-n1; i++){
+          blterm1[i]=bltermOld1[i];
+          NFs[i]=NFsOld[i];
+        };
+        free(bltermOld1);free(NFsOld);
       }
     }
     
-    /* load in new terminal states */
-    for (i=0; i<n1; i++) blterm1[(nterm1)-n1+i]=blterm2[i];
+    /* load in new terminal states and normal forms */
+    for (i=0; i<n1; i++){
+      blterm1[(nterm1)-n1+i] = blterm2[i];
+      NFs[(nterm1)-n1+i] = normalform(blterm2[i]);
+    }; 
     
     /* monitor */
     if (monitor) {
@@ -255,16 +279,16 @@ struct bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int
     fflush(fp1);
     
     /* print terminal states to file */
-    if (!(crun%10)){
-      fp2 = fopen("Terminal_States.txt","w");
-      for(i=0; i<nterm1; i++) fprintbitlist(fp2, blterm1[i]); 
-      fclose(fp2); 
-    }
+    for (i=0; i<n1; i++) fprintbitlist(fp2, blterm2[i]); 
   }
   
-  fclose(fp1); 
+  /* close files */
+  fclose(fp1); fclose(fp2); 
   
+  /* assign total number of reduced terminal states */
   *numterm = nterm1;
 
+  /* return list of reduced terminal states */
   return blterm1; 
 }
+
