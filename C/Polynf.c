@@ -1,21 +1,21 @@
 #include "Global.h"
 #include "Rat.h"
 
+/*    =============     G L O B A L    D E F I N I T I O N S     =============      */
+
 #define SL_Long		LLong		   
 
-#define NFX_Limit       903		/* 138b->255  153e->279  165c->327 */
-#define X_Limit         99999		   /* 178c->375  218->399,462,483 */
-#define VPM_Limit	99999
+#define NFX_Limit       903		        /* 138b->255  153e->279  165c->327 */
+#define X_Limit         9999		    /* 178c->375  218->399,462,483 */
+#define VPM_Limit	    9999
 
-#define TEST_GLZ_VS_SL	(0)		/* exit on difference: GL vs. SL */
+#define TEST_GLZ_VS_SL	(0)		        /* exit on difference: GL vs. SL */
 
-#undef  WARN_BIG_NS			/* [1152] ...  1152 = sym(24-cell)  */
+typedef struct {int nv, nf, ns;} vNF;
 
-typedef struct {int nv, nf, ns;}  				vNF;
+typedef struct {int C[VERT_Nmax], L[VERT_Nmax], s;} PERM;
 
-typedef struct {int C[VERT_Nmax], L[VERT_Nmax], s;}             PERM;
-
-/*      =============================================================       */
+/*    ======================     P R O T O T Y P E S     ======================      */
 
 int  GLZ_Make_Trian_NF(Long X[][VERT_Nmax], int *n, int *nv,
 		       GL_Long G[POLYDIM][POLYDIM]);   
@@ -23,21 +23,21 @@ int  GLZ_Make_Trian_NF(Long X[][VERT_Nmax], int *n, int *nv,
 int  SL2Z_Make_Poly_NF(Long X[][VERT_Nmax], int *n, int *nv,
 		       SL_Long S[POLYDIM][POLYDIM]);   
 
-int  Init_rVM_VPM(PolyPointList *P, VertexNumList *_V,EqList *_F,/* in */
-	    	int *d,int *v,int *f, Long VM[POLYDIM][VERT_Nmax], /* out */
-	    	Long VPM[VERT_Nmax][VERT_Nmax]);	/* return reflexive */
+int  Init_rVM_VPM(PolyPointList *P, VertexNumList *_V,EqList *_F,   
+	    	int *d,int *v,int *f, Long VM[POLYDIM][VERT_Nmax],      
+	    	Long VPM[VERT_Nmax][VERT_Nmax]);	                    
 	    	
-void Make_VPM_NF(int *v, int *f, Long VPM[VERT_Nmax][VERT_Nmax],      /* in */
-		PERM *CL,int *ns,Long VPM_NF[VERT_Nmax][VERT_Nmax]); /* out */
+void Make_VPM_NF(int *v, int *f, Long VPM[VERT_Nmax][VERT_Nmax],     
+		PERM *CL,int *ns,Long VPM_NF[VERT_Nmax][VERT_Nmax]);        
 		
 void Aux_pNF_from_vNF(PERM *CL,int *ns,int *v,int *d,
-		Long VM[POLYDIM][VERT_Nmax],			      /* in */
-		Long pNF[POLYDIM][VERT_Nmax],int *t);		     /* out */
+		Long VM[POLYDIM][VERT_Nmax],			                      
+		Long pNF[POLYDIM][VERT_Nmax],int *t);		                  
 		
 void New_pNF_Order(int *v,int *f,PERM *CL,int *ns,Long VPM_NF[][VERT_Nmax]);
 	    
 	
-/*      =============================================================       */
+/*    ======================     F U N C T I O N S     ======================      */
 
 	
 void swap(int* i,int* j) {register int k; k=*i; *i=*j; *j=k;}
@@ -91,7 +91,7 @@ GL_Long GL_W_to_GLZ(GL_Long *W, int d, GL_Long **GLZ)
         G=W[i]/g; 
         for(j=0;j<i;j++) B[j]=-E[j]*G;  /* B=Base-Line */
         for(j=0;j<i;j++) E[j]*=a;
-		E[j]=b;                     /* next Egcd */
+		E[j]=b;                         /* next Egcd */
         for(j=i-1;0<j;j--){   
         	GL_Long *Y=GLZ[j],rB=GL_RoundQ(B[j],Y[j]),rE=GL_RoundQ(E[j],Y[j]);
             int n; 
@@ -110,7 +110,8 @@ int  GLZ_Make_Trian_NF(Long X[][VERT_Nmax], int *n, int *nv, GL_Long G[POLYDIM][
 	
 	for(i=0;i<*n;i++)_G[i]=NG[i];
     
-    for(i=0;i<*n;i++)for(j=0;j<*n;j++)G[i][j]=(i==j);		  /* init G */
+    /* initialise G */
+    for(i=0;i<*n;i++)for(j=0;j<*n;j++)G[i][j]=(i==j);		  
     
     for(i=0;i<*n;i++)for(j=0;j<*nv;j++)NF[i][j]=0; 
     
@@ -140,7 +141,7 @@ int  GLZ_Make_Trian_NF(Long X[][VERT_Nmax], int *n, int *nv, GL_Long G[POLYDIM][
 	    	}
 		}
         if(L!=p[0])
-        	 /* swap lines G[L] <-> G[p[0]] */
+        	/* swap lines G[L] <-> G[p[0]] */
         	for(i=0;i<*n;i++){
         		GL_Long A=G[L][i]; G[L][i]=G[p[0]][i]; G[p[0]][i]=A; 
 			}
@@ -170,6 +171,7 @@ int  GLZ_Make_Trian_NF(Long X[][VERT_Nmax], int *n, int *nv, GL_Long G[POLYDIM][
 }
 
 
+/* check if vertex matrix or vertex-facet pairing matrix exceed limits */
 void TEST_rVM_VPM(int *d,int *v,int *f, Long X[POLYDIM][VERT_Nmax],
 	    	Long x[VERT_Nmax][VERT_Nmax])
 {    
@@ -183,49 +185,48 @@ void TEST_rVM_VPM(int *d,int *v,int *f, Long X[POLYDIM][VERT_Nmax],
     if(err){	
     	printf("TEST_VM_VPM: limits exceeded %d\n",err);
 		printf("%d %d VM[%d][%d]:\n",*v,*d,*d,*v);
-		for(j=0;j<*d;j++){   
-			for(i=0;i<*v;i++)printf("%3d ",(int) X[j][i]);puts("");
-		}   
+		for(j=0;j<*d;j++) for(i=0;i<*v;i++) printf("%3d ",(int) X[j][i]);puts("");
 		puts("");
 		printf("VPM[%d][%d]:\n",*f,*v);
-		for(j=0;j<*f;j++){   
-			for(i=0;i<*v;i++)printf("%3d ",(int) x[j][i]);puts("");
-		}   
+		for(j=0;j<*f;j++) for(i=0;i<*v;i++) printf("%3d ",(int) x[j][i]);puts("");   
 		puts("");
 		exit(0);
      }
 }
 
 
-int  Init_rVM_VPM(PolyPointList *_P,VertexNumList *_V,EqList *_F,/* in */
-	    	int *d,int *v,int *f, Long X[POLYDIM][VERT_Nmax],  /* out */
-	    	Long x[VERT_Nmax][VERT_Nmax])		/* return reflexive */
+/* initialise the vertex matrix and vertex-facet pairing matrix */
+int  Init_rVM_VPM(PolyPointList *_P,VertexNumList *_V,EqList *_F,  /* in */
+	    	int *d,int *v,int *f, Long X[POLYDIM][VERT_Nmax],      /* out */
+	    	Long x[VERT_Nmax][VERT_Nmax])		                 
 {    
-	int i,j, ref=1; 
+	int i, j, ref=1; 
 	
 	/* define the number of vertices, equations and points */
     *v=_V->nv; 
     *f=_F->ne; 
     *d=_P->n;
      
-    /* compute VPM */
+    /* compute the vertex-facet pairing matrix */
     for(j=0;j<_F->ne;j++) {
 		if(_F->e[j].c!=1) ref=0; 
-		for(i=0;i<_V->nv;i++)
-        	x[j][i]=Eval_Eq_on_V(&_F->e[j],_P->x[_V->v[i]],_P->n);
-    }
+		for(i=0;i<_V->nv;i++) x[j][i]=Eval_Eq_on_V(&_F->e[j],_P->x[_V->v[i]],_P->n);
+	}
     
+    /* compute the vertex matrix */
     for(i=0;i<_V->nv;i++){  
     	Long *pv=_P->x[_V->v[i]];
 		for(j=0;j<_P->n;j++) X[j][i]=pv[j];
     }
     
+    /* test if either matrices exceed limits */
     TEST_rVM_VPM(d,v,f,X,x);
     
+    /* return reflexive */
     return ref;
 }
 
-
+/* order the columns of the normal form vertex matrix */
 void New_pNF_Order(int *v,int *f,PERM *CL,int *ns,Long VPM_NF[][VERT_Nmax])
 {    
 	int i, j;
@@ -250,13 +251,10 @@ void New_pNF_Order(int *v,int *f,PERM *CL,int *ns,Long VPM_NF[][VERT_Nmax])
         if(n!=i){  
         	Long aP=maxP[i]; 
         	int a=pi[i]; 
-	    	maxP[i]=maxP[n]; 
-	    	maxP[n]=aP; 
-	    	pi[i]=pi[n]; 
-	    	pi[n]=a;
+	    	maxP[i]=maxP[n]; maxP[n]=aP; 
+	    	pi[i]=pi[n]; pi[n]=a;
 	    	aP=sumP[i]; 
-	    	sumP[i]=sumP[n]; 
-	    	sumP[n]=aP; 
+	    	sumP[i]=sumP[n]; sumP[n]=aP; 
 		}
     }
     
@@ -270,12 +268,13 @@ void New_pNF_Order(int *v,int *f,PERM *CL,int *ns,Long VPM_NF[][VERT_Nmax])
 
 void Aux_vNF_Line(int l,vNF *_X,Long x[][VERT_Nmax], PERM *CL,int *S,int *_ns)
 {    
-	int n=(*_ns), cf=0;	/*  cf=CompareFlag (ref. exists & o.k.      */
-    Long *y, r[VERT_Nmax];	/*  r=ReferenceLine; y->X[line]		    */
+	int n=(*_ns), cf=0;	    /*  cf=CompareFlag (ref. exists & o.k.  */
+    Long *y, r[VERT_Nmax];	/*  r=ReferenceLine; y->X[line]  */
+    
     /*  go over CL (n from  *_ns-1  to  0), ns_* changes!  */
     while(n--){	
     	PERM nP[VERT_Nmax];	        
-		int c=0, L=l-1, np=0, *C, ccf=cf;	/*  ccf=column compare flag */
+		int c=0, L=l-1, np=0, *C, ccf=cf; /*  ccf=column compare flag */
 		*nP=CL[n];
 		/*  init nP (from 1st col.) */
 		while(++L<_X->nf){   
@@ -331,21 +330,20 @@ void Aux_vNF_Line(int l,vNF *_X,Long x[][VERT_Nmax], PERM *CL,int *S,int *_ns)
 		    			np=L+1; 
 		    			*_ns=n+1;
 		    		}	
-		    		/* else	; */			      /* EQUAL line */
 				}
 				else { r[c]=y[C[c]]; ccf=1; }
 	    	}
 		}
 	
 		cf=1;
-		if(--(*_ns) > n) CL[n]=CL[*_ns]; 		/*  write nP to CL  */
+		if(--(*_ns) > n) CL[n]=CL[*_ns]; /*  write nP to CL  */
 		if(SYM_Nmax < (cf=(*_ns+np))){   
 			printf("Need SYM_Nmax > %d !!\n",cf);exit(0);
 		}
 		for(L=0;L<np;L++) CL[(*_ns)++]=nP[L];
      }
      
-     y=x[CL->L[l]];					       /* compute S */
+     y=x[CL->L[l]];	/* compute S */
      
      {	
      	int c=0, *C=CL->C;
@@ -363,20 +361,19 @@ void Aux_vNF_Line(int l,vNF *_X,Long x[][VERT_Nmax], PERM *CL,int *S,int *_ns)
 void Aux_vNF_Init(vNF *_X, Long x[][VERT_Nmax], PERM *CL, int *S, int *_ns)
 {    
 	int i, j, nn; 
+	/* b=x[nb] -> best;  y=x[nn] -> next */
 	Long *b, *y;
-    PERM P, *q, *p;		       /* b=x[nb] -> best;  y=x[nn] -> next */
+    PERM P, *q, *p;	
     
+    /* initialise permutation */
     for(i=0;i<_X->nf;i++) P.L[i]=i;
-    for(j=0;j<_X->nv;j++) P.C[j]=j; /* init P */
+    for(j=0;j<_X->nv;j++) P.C[j]=j; 
     
-    q=CL; *q=P; b=*x;          /* P=CL[ns-1] StartPerm; maximize 0-th line */
+    /* start by maximising 0-th line */
+    q=CL; *q=P; b=*x;         
+    for(j=1;j<_X->nv;j++) if(b[q->C[0]] < b[q->C[j]]) swap(&q->C[0], &q->C[j]);
     
-    for(j=1;j<_X->nv;j++)if(b[q->C[0]]<b[q->C[j]])swap(&q->C[0],&q->C[j]);
-    
-    for(i=1;i<_X->nv;i++){  
-    	for(j=i+1;j<_X->nv;j++) if(b[q->C[i]]<b[q->C[j]]) 
-        swap(&q->C[i],&q->C[j]);
-    }
+    for(i=1;i<_X->nv;i++) for(j=i+1;j<_X->nv;j++) if(b[q->C[i]] < b[q->C[j]]) swap(&q->C[i], &q->C[j]);
 
 	/* maximize nn-th line */
     for(nn=1;nn<_X->nf;nn++){  
@@ -385,8 +382,8 @@ void Aux_vNF_Init(vNF *_X, Long x[][VERT_Nmax], PERM *CL, int *S, int *_ns)
     	*p=P; y=x[nn]; /* nb=*q=*b=best, nn=*p=*y=next */
         {
         	int m=0; 
-        	for(j=1;j<_X->nv;j++) if(y[p->C[m]]<y[p->C[j]]) m=j;
-            if(m) swap(&p->C[0],&p->C[m]);
+        	for(j=1;j<_X->nv;j++) if(y[p->C[m]] < y[p->C[j]]) m=j;
+            if(m) swap(&p->C[0], &p->C[m]);
         }
         if((d=y[p->C[0]]-b[q->C[0]]) < 0) continue;   /* d<0 => forget this */
         for(i=1;i<_X->nv;i++){   
@@ -396,9 +393,9 @@ void Aux_vNF_Init(vNF *_X, Long x[][VERT_Nmax], PERM *CL, int *S, int *_ns)
             if(d==0) if((d=y[p->C[i]]-b[q->C[i]]) <0) break;
     	}
         if(d<0) continue;
-        swap(&p->L[0],&p->L[nn]);		 /* p->L[nn]=0; p->L[0]=nn; */ 
+        swap(&p->L[0],&p->L[nn]); /* p->L[nn]=0; p->L[0]=nn; */ 
         if(d==0) (*_ns)++; 
-        else {*q=*p; *_ns=1; b=y;}                    /* d>0 => forget prev */
+        else {*q=*p; *_ns=1; b=y;} /* d>0 => forget prev */
     }
     
     y=x[CL->L[0]]; 
@@ -484,63 +481,52 @@ void Aux_Make_Triang(PERM *CL,int ns,Long V[][VERT_Nmax],int*n,int*nv,int *t)
 	}
     }
     
-    if(*t>0)
-    printf("\nPoly NF:  NormalForm=try[%d]  #Sym(VPM)=%d  #Sym(Poly)=%d\n",g,ns,ps);
+    if(*t>0) printf("\nPoly NF:  NormalForm=try[%d]  #Sym(VPM)=%d  #Sym(Poly)=%d\n",g,ns,ps);
     if(x) for(i=0;i<*n;i++)for(j=0;j<*nv;j++) V[i][j]=Y[i][j];
     else  for(i=0;i<*n;i++)for(j=0;j<*nv;j++) V[i][j]=X[i][j];
 }
 
 
 void Make_VPM_NF(int *v, int *f, Long x[VERT_Nmax][VERT_Nmax],      /* in */
-		PERM *CL,int *ns,Long VPM_NF[VERT_Nmax][VERT_Nmax])  /* out */
+		PERM *CL,int *ns,Long VPM_NF[VERT_Nmax][VERT_Nmax])         /* out */
 {    
 	int i, j;
 	int S[VERT_Nmax]; 
-	int nsF=0, nsM=0; 
-
-	/* X=VPM */
     volatile vNF auX; 
-    vNF *_X= (vNF*) &auX; 
+    vNF *_X= (vNF*) &auX; /* X=VPM */
     
-    /* define the number of vertices and number of equations */ 
+    /* define the number of vertices and number of facets */ 
     _X->nv=*v;
     _X->nf=*f;
      
+    /* order the normal form */
+    
+    /* initialise */
     *ns=1; 
-    Aux_vNF_Init(_X, x, CL, S, ns);             /* init = 1st line */
-     
-    for(i=1;i<_X->nf-1;i++){
-    	Aux_vNF_Line(i,_X,x,CL,S,ns);  /* lines of NF */
-		#ifdef	WARN_BIG_NS
-			if((WARN_BIG_NS<=(*ns))||nsF) nsF=1;
-		#endif
-		if(*ns>nsM) nsM=*ns; 
-	}
-	
+    Aux_vNF_Init(_X, x, CL, S, ns);            
+    
+    for(i=1;i<_X->nf-1;i++) Aux_vNF_Line(i, _X, x, CL, S, ns);  
     _X->ns=*ns; 
     
      /* write VPM-NF to _X */
-    for(i=0;i<_X->nv;i++){  
-    	for(j=0;j<_X->nf;j++) /* _X->x */ VPM_NF[j][i]=x[CL->L[j]][CL->C[i]];
-    }
-    
-    if(nsF)printf("WARNing: ns_max=%d -> ns=%d\n",nsM,*ns);
+    for(i=0;i<_X->nv;i++) for(j=0;j<_X->nf;j++) VPM_NF[j][i]=x[CL->L[j]][CL->C[i]];  
 }
 
-
+/* given the vertex matrix and maximal permutation compute the normal form */
 void Aux_pNF_from_vNF(PERM *CL,int *ns,int *v,int *d,
-		Long VM[POLYDIM][VERT_Nmax],			      /* in */
-		Long pNF[POLYDIM][VERT_Nmax],int *t)		     /* out */
+		Long VM[POLYDIM][VERT_Nmax],			          /* in */
+		Long pNF[POLYDIM][VERT_Nmax],int *t)		      /* out */
 {    
 	int i,j;
+	/* define the vertex matrix */
     for(i=0;i<*d;i++) for(j=0;j<*v;j++) pNF[i][j]=VM[i][j];
+    
+    /* compute the ordered triangular form */
     Aux_Make_Triang(CL,*ns,pNF,d,v,t);
 }
 
 
-int  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F, 
-		      int *SymNum, int V_perm[][VERT_Nmax], 
-		      Long NF[POLYDIM][VERT_Nmax])
+void  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F, Long NF[POLYDIM][VERT_Nmax])
 {    
 	int i, j;
 	int ns;
@@ -553,6 +539,7 @@ int  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F,
 	
 	int *C; 
 	
+	/* define the permutation object */
     PERM *CL = (PERM *) malloc ( sizeof(PERM) *(SYM_Nmax+1));
     
     /* define the vertex matrix, vertex pairing matrix and the normal form vertex pairing matrix */
@@ -565,15 +552,14 @@ int  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F,
 
 	/* compute the normal form of the vertex pairing matrix */
     Make_VPM_NF(v,f,VPM,CL,&ns,VPM_NF);
-    
-    /* order the normal form */
+
+    /* order the normal form vertex pairing matrix */
     New_pNF_Order(v,f,CL,&ns,VPM_NF);
     
+    /* transform the vertex matrix into normal form */
     Aux_pNF_from_vNF(CL,&ns,v,d,VM,NF,&t);
     
     free(CL); 
-    
-    return ns;
 }
 
 
@@ -656,3 +642,4 @@ int  SL2Z_Make_Poly_NF(Long X[][VERT_Nmax], int *n, int *nv, SL_Long S[POLYDIM][
      }
      return 1;
 }
+
