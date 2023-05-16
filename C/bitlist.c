@@ -1,107 +1,99 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	 	==========  */
+/*  ==========	     			   	  	        ==========  */
 /*  ==========         B I T L I S T   F U N C T I O N S        ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
 
 #include "Global.h"
 
-/* compare two arrays */
+/* compare two arrays, return 0 if identical and 1 otherwise */
 char compareArray(int a[],int b[],int size){
 	int i;
-	for(i=0;i<size;i++){
-		if(a[i]!=b[i])
-			return 1;
-	}
+	for(i=0;i<size;i++) if(a[i]!=b[i]) return 1;
 	return 0;
 }
 
 
-/* convert decimal into binary */
-struct binary decimal2binary(int num)
+/* convert decimal number into binary number */
+binary decimal2binary(int num)
 {
-  struct binary bin;
+  binary bin;
   int binlist[BINLEN];
   int i,j,k;
   
   if(num == 0){
-    for(i=0; i < BINLEN; i++){
-      bin.list[i] = 0;
-    }
+    for(i=0; i < BINLEN; i++) bin.list[i] = 0;
     return bin;
   }
+  else{
+    for(j=0; num > 0; j++){
+      binlist[j] = num % 2;
+      num /= 2;
+    }
   
-  for(j=0; num > 0; j++){
-    binlist[j] = num % 2;
-    num /= 2;
-  }
-  
-  for(k=0; k < BINLEN-j; k++){
-    bin.list[k] = 0;
-  }
+    for(k=0; k < BINLEN-j; k++) bin.list[k] = 0;
     
-  int l=BINLEN-j;
-  int m;
-  for(m=j-1; m >= 0; m--){
-    bin.list[l++] = binlist[m];
-  }
+    int m,l=BINLEN-j;
+    for(m=j-1; m >= 0; m--) bin.list[l++] = binlist[m];
   
-  return bin;
+    return bin;
+  }
 }
 
 
-/* convert bit list to integer */
-int binaryToDecimal(struct binary bin)
+/* convert bitlist to an integer */
+int binaryToDecimal(binary bin)
 {
-  int i, num;
-
-  num=0;
-  for (i=0; i<BINLEN; i++)
-    num=num+bin.list[i]*pow(2,BINLEN-i-1);
-
+  int i,num=0;
+  for (i=0; i<BINLEN; i++) num=num+bin.list[i]*pow(2,BINLEN-i-1);
   return num;
 }  
 
 
-/* convert a points list into a bit list after adding max */
-struct bitlist pts2bts(struct pointlist pl)
+/* convert a pointlist to a bitlist after adding max */
+bitlist pts2bts(pointlist pl)
 {
-  struct bitlist bl;
-  struct bitlist * blp = &bl;
-  int i,j,k;
-  int num;
-  struct binary bin;
-    
+  int i,j,k,num;
+  bitlist bl, *blp=&bl;;
+  binary zerobin, bin;
+  
+  /* define bitlist length */
   bl.len = MAXNVRTS*POLYDIM*BINLEN;
+  
+  /* define binary number corresponding to 0 */
+  zerobin = decimal2binary(-MIN);
 
-  for(i=0; i < pl.len; i++){
-    for(j=0; j < POLYDIM; j++){
-      num = pl.points[i][j];
-      bin = decimal2binary(num - MIN);
-      for(k=0; k < BINLEN; k++){
-        bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k] = bin.list[k];
+  /* convert decimal points to binary numbers and add to bitlist */
+  for(i=0; i<MAXNVRTS; i++){
+    if (i<pl.len) {
+      for(j=0; j < POLYDIM; j++){
+        num = pl.points[i][j];
+        bin = decimal2binary(num - MIN);
+        for(k=0; k < BINLEN; k++) bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k] = bin.list[k];
       }
+    }
+    else {
+      for(j=0; j < POLYDIM; j++) 
+        for(k=0; k < BINLEN; k++) bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k] = zerobin.list[k];
     }
   }
   
+  /* compute the fitness */
   fitness(blp);
   
   return bl;
 }
 
 
-/* convert a bit list into a reduced points list and subtract max */
-struct pointlist bts2pts(struct bitlist bl)
+/* convert a bitlist into a reduced pointlist and subtract max */
+pointlist bts2pts(bitlist bl)
 {
-  struct pointlist pl;
-  int i,j,k;
-  int count=0;
-  int new;
+  int i,j,k,count=0,new;
   int point[POLYDIM];
-  struct binary bin;
+  pointlist pl;
+  binary bin;
   
   for(i=0; i<MAXNVRTS; i++){
-    
     for(j=0; j<POLYDIM; j++){
       for(k=0; k<BINLEN; k++){
         bin.list[k] = bl.bits[(i*POLYDIM*BINLEN)+(j*BINLEN)+k];
@@ -120,7 +112,7 @@ struct pointlist bts2pts(struct bitlist bl)
     
   }
   pl.len = count;
-  
+
   return pl;
 }
 
@@ -132,21 +124,21 @@ int randomint(int min, int max)
 }  
 
 
-/* generate a random state */
-struct bitlist randomstate()
+/* generate a random bitlist state */
+bitlist randomstate()
 {
-  struct bitlist bl;
-  struct pointlist pl;
   int i,j;
+  bitlist bl;
+  pointlist pl;
   
-  /* srand(clock()); */
-  for(i=0; i<MAXNVRTS; i++){
-  	for(j=0; j<POLYDIM; j++){
-  	  pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
-  	}
-  }
+  /* set random number generator seed */
+  srand(clock()); 
+  
+  /* randomly generate points */
+  for(i=0; i<MAXNVRTS; i++) for(j=0; j<POLYDIM; j++) pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   pl.len = MAXNVRTS;
   
+  /* convert pointlist to bitlist */
   bl = pts2bts(pl);
   
   return bl;
@@ -156,7 +148,7 @@ struct bitlist randomstate()
 /* generate a random choice for integers 0,...,len-1 for a probability distribution p */
 int randomchoice(float p[POPSIZE], int len)
 {
-  float psum, P, fran;
+  float psum,P,fran;
   int i;
 
   /* determine normalisation */
@@ -174,19 +166,17 @@ int randomchoice(float p[POPSIZE], int len)
 
  
 /* flips bit in position pos for a bitlist bl */
-void flipbit(struct bitlist *bl, int pos)
+void flipbit(bitlist *bl, int pos)
 {
-  if ((pos>=0) && (pos<(bl->len))){
-    (bl->bits)[pos]=((bl->bits)[pos]+1) % 2;
-  } 
+  if ((pos>=0) && (pos<(bl->len))) (bl->bits)[pos]=((bl->bits)[pos]+1) % 2;
 }  
 
 
 /* copies the bits in bitlist bl from position pos1 to pos2-1 into a new bitlist */
-struct bitlist copybitlist(struct bitlist bl, int pos1, int pos2)
+bitlist copybitlist(bitlist bl, int pos1, int pos2)
 {
-  struct bitlist blcopy;
-  int i, p1, p2;
+  bitlist blcopy;
+  int i,p1,p2;
 
   /* make sure positions are viable */
   if (pos1<=pos2) {p1=pos1; p2=pos2;}
@@ -209,9 +199,9 @@ struct bitlist copybitlist(struct bitlist bl, int pos1, int pos2)
 
 
 /* pastes bitlist blpaste into bitlist bl at position pos, overwriting previous content in bl */
-void pastebitlist(struct bitlist *bl, struct bitlist blpaste, int pos)
+void pastebitlist(bitlist *bl, bitlist blpaste, int pos)
 {
-  int len, i;
+  int len,i;
 
   /* make sure position and length are ok */
   if (pos<0) pos=0;
@@ -219,37 +209,34 @@ void pastebitlist(struct bitlist *bl, struct bitlist blpaste, int pos)
   len=((pos+blpaste.len<=bl->len) ? blpaste.len : bl->len-pos);
 
   /*copy b1paste into bl */
-  if (len>0) {
-    for (i=0; i<len; i++) (bl->bits)[pos+i]=blpaste.bits[i];
-  }
+  if (len>0) for (i=0; i<len; i++) (bl->bits)[pos+i]=blpaste.bits[i];
 }
 
 									  
 /* a simple insertion sort of an integer array into ascending order */
 void isort(int arr[], int len)
 {
-    int i, key, j;
-    for (i = 1; i < len; i++)
+    int i,key,j;
+    for (i=1; i<len; i++)
     {
-        key = arr[i];
-        j = i - 1;
-
-        while (j >= 0 && arr[j] > key)
+        key=arr[i];
+        j=i-1;
+        while (j>=0 && arr[j]>key)
         {
-            arr[j + 1] = arr[j];
-            j = j - 1;
+            arr[j+1]=arr[j];
+            j=j-1;
         }
-        arr[j + 1] = key;
+        arr[j+1]=key;
     }
 }
 									  
 
 /* crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts */
-void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cuts[NUMCUTS])
+void crossbitlists(bitlist *bl1, bitlist *bl2, int numcuts, int cuts[NUMCUTS])
 {
 
-  int i, minlen, start, end, cuts1[NUMCUTS+2];
-  struct bitlist blpart1, blpart2;
+  int i,minlen,start,end,cuts1[NUMCUTS+2];
+  bitlist blpart1, blpart2;
 
   /* set lengths of bitlists to common minimum */
   minlen=((bl1->len < bl2->len) ? bl1->len : bl2->len);
@@ -282,7 +269,7 @@ void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cu
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2)
 {
-  const struct bitlist *bl1=p1, *bl2=p2;
+  const bitlist *bl1=p1, *bl2=p2;
 
   if (bl1->fitness < bl2->fitness) return 1;
   else if  (bl1->fitness > bl2->fitness) return -1;
@@ -290,16 +277,16 @@ int compbitlist(const void *p1, const void *p2)
 }  
 
 /* compute the normal form of a polytope from its bitlist */
-struct NormalForm normalform(struct bitlist bl)
+NormalForm normalform(bitlist bl)
 {
-  int i, j, IP, SymNum, VPMSymNum;
-  struct pointlist pl;
+  int i,j,IP;
+  pointlist pl;
   PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
   VertexNumList V;
   EqList *E = (EqList *) malloc(sizeof(EqList));
   VPermList *VP = (VPermList*) malloc(sizeof(VPermList));
   Long NF[POLYDIM][VERT_Nmax];
-  struct NormalForm NF0;
+  NormalForm NF0;
   
   /* transform the bitlists into point lists */
   pl = bts2pts(bl);
@@ -315,7 +302,7 @@ struct NormalForm normalform(struct bitlist bl)
   IP=Find_Equations(_P,&V,E); 
 
   /* compute normal form */
-  VPMSymNum = Make_Poly_Sym_NF(_P, &V, E, &SymNum, VP->p, NF);
+  Make_Poly_Sym_NF(_P, &V, E, NF);
   NF0.nv=V.nv; 
   for (i=0; i<POLYDIM; i++) for(j=0; j<VERT_Nmax; j++) NF0.x[i][j]=NF[i][j];
   
@@ -326,7 +313,7 @@ struct NormalForm normalform(struct bitlist bl)
 
 
 /* decide if two bistlist are identical */
-int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
+int bitlistsequal(bitlist bl1, bitlist bl2)
 {
   int i, equal;
   
@@ -341,8 +328,9 @@ int bitlistsequal(struct bitlist bl1, struct bitlist bl2)
   } 
 }
 
+
 /* decide if two normal forms are equal */
-int NFsequal(struct NormalForm NF1, struct NormalForm NF2)
+int NFsequal(NormalForm NF1, NormalForm NF2)
 {
   int i, j, equal;
   
@@ -367,17 +355,16 @@ int NFsequal(struct NormalForm NF1, struct NormalForm NF2)
 
 
 /* decide if two bistlist are equivalent by comparing their normal forms */
-int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
+int bitlistsequiv(bitlist bl1, bitlist bl2)
 {
   int i, j, equal;
-  struct pointlist pl1, pl2;
+  pointlist pl1, pl2;
   VertexNumList V01, V02;
   EqList *E01 = (EqList *) malloc(sizeof(EqList)),
          *E02 = (EqList *) malloc(sizeof(EqList));
   PolyPointList *_P01 = (PolyPointList *) malloc(sizeof(PolyPointList)),
    				*_P02 = (PolyPointList *) malloc(sizeof(PolyPointList));
   int IP1, IP2;
-  
   
   /* transform the bitlists into point lists */
   pl1 = bts2pts(bl1);
@@ -404,15 +391,14 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
   	 return 0;
   }
   else {
-  	int SymNum1, SymNum2, VPMSymNum1, VPMSymNum2;
   	VPermList *VP01 = (VPermList*) malloc(sizeof(VPermList)),
               *VP02 = (VPermList*) malloc(sizeof(VPermList)); 
   	Long NF1[POLYDIM][VERT_Nmax], NF2[POLYDIM][VERT_Nmax];
-  	struct NormalForm NF01, NF02;
+  	NormalForm NF01, NF02;
   
     /* compute the normal forms of the polytopes */
-	VPMSymNum1 = Make_Poly_Sym_NF(_P01, &V01, E01, &SymNum1, VP01->p, NF1);
-    VPMSymNum2 = Make_Poly_Sym_NF(_P02, &V02, E02, &SymNum2, VP02->p, NF2);   
+	Make_Poly_Sym_NF(_P01, &V01, E01, NF1);
+    Make_Poly_Sym_NF(_P02, &V02, E02, NF2);   
     NF01.nv = V01.nv; NF02.nv = V02.nv; 
     for (i=0; i<POLYDIM; i++){
       for(j=0; j<VERT_Nmax; j++){
@@ -434,10 +420,10 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2)
 
 
 /* write bitlist to a file in the format of the list of vertices  */
-void fprintbitlist(FILE * fp, struct bitlist bl)
+void fprintbitlist(FILE * fp, bitlist bl)
 {
   int i,j,IP;
-  struct pointlist pl;
+  pointlist pl;
   VertexNumList V;
   EqList *E = (EqList *) malloc(sizeof(EqList));
   PolyPointList *_P = (PolyPointList *) malloc(sizeof(PolyPointList));
@@ -463,5 +449,74 @@ void fprintbitlist(FILE * fp, struct bitlist bl)
   fprintf(fp,"]\n");
   
   free(E);free(_P);
+}
+
+
+/* read bitlists from a file */
+bitlist * freadbitlist(char *filename, int len)
+{
+  char * line;
+  int i, j, k, c, d;
+  size_t size = 0;
+  int arr[100];
+  pointlist pl;
+  bitlist * bl = calloc(len,sizeof(bitlist)); 
   
+  FILE * fp = fopen(filename, "r");
+  
+  if (fp == NULL) {
+    printf("Error opening the file\n");
+    exit(1);
+  }
+  
+  /* read file in line by line */
+  line = NULL;
+  i=0; 
+  while (getline(&line, &size, fp ) != -1) {  
+    /* determine the number of vertices */
+    j=0; c=0; d=0;
+    while (j<strlen(line)) {
+      if (line[j] == '[' || line[j] == ',' || line[j]=='\n') j++;
+      else if (line[j] == ']') {
+        j++; c++;
+      }
+      else if (line[j] == '-') {
+        j++; j++; d++;
+      }
+      else {
+        j++; d++;
+      }
+    }
+    
+    /* write vertices to a pointslist */
+    pl.len = c-1;
+    j=0; c=0; d=0;
+    while (j<strlen(line)) {
+      
+      if (line[j] == '[' || line[j] == ',' || line[j]=='\n') j++;
+      else if (line[j] == ']') {
+        j++; c++; d=0;
+      }
+      else if (line[j] == '-') {
+        pl.points[c][d] = -((int)(line[j+1])-(int)('0'));
+        j++; j++; d++;
+      }
+      else {
+        pl.points[c][d] = (int)(line[j])-(int)('0');
+        j++; d++;
+      }
+    }
+
+    /* convert to bitlist and add to list */
+    bl[i] = pts2bts(pl);
+    
+    /* update index */
+    i++;
+  }
+  
+  /* close file */ 
+  fclose(fp);
+
+  /* return list of bitlists */  
+  return bl;
 }
