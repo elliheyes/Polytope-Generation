@@ -11,7 +11,7 @@ int main (int narg, char* fn[]){
   int n;
   
   /* repeated evolution of a random initial population, extracting terminal states */
-  struct bitlist * bl = searchenv(1000, 1, NUMGEN, POPSIZE, ROULETTE, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITORON, &n); 
+  bitlist * bl = searchenv(1000, 1, NUMGEN, POPSIZE, ROULETTE, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITORON, &n); 
 
   return 0;
 } 
