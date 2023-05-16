@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	     	==========  */
+/*  ==========	     			   	  	    	==========  */
 /*  ==========      P O P U L A T I O N   F U N C T I O N S     ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -7,63 +7,8 @@
 #include "Global.h"
 
 
-/* generate a random population of size popsize */
-struct population randompop(int popsize)
-{
-  int size, i;
-  struct population pop;
-  struct bitlist blfitest;
-
-  size=((popsize>POPSIZE) ? POPSIZE : popsize);
-  for (i=0; i<size; i++) pop.bl[i]=randomstate();
-  pop.size=size;
-
-  /* compute average and maximal fitness for random population */
-  pop.avfitness=avfitness(&pop);        /* average fitness in population */
-  blfitest=fitestinpop(&pop);		/* fittest in population */
-  pop.maxfitness=blfitest.fitness;      /* maximal fitness in population */
-  pop.nterm=nterminalpop(&pop);         /* number of terminal state in mutated population */
-  
-  return pop;
-}  
-
-
-/* sort a population by fitness */
-void sortpop(struct population *pop)
-{
-  qsort(pop->bl,pop->size,sizeof(struct bitlist),compbitlist);
-}
-
-
-/* mutate a population */
-void mutatepop(struct population *pop, float mutrate)
-{
-  int len, nbits, nmut, i, k, pos, ipos, bpos;
-  struct bitlist blfitest;
-
-  len=((pop->bl)[0]).len;     /* length of bitlist, assume they are the same across population */
-  nbits=len*(pop->size);      /* total number of bits in population */
-  nmut=round(nbits*mutrate);  /* number of bits to be mutated */
-
-  /* run over mutations */
-  for (i=0; i<nmut; i++) {
-    pos=randomint(0,nbits);	        /* random bit position in entire population */
-    ipos=pos/len;       	     	/* individual where mutation occurs */
-    bpos=pos%len;                       /* bit position in individual */
-    flipbit(&((pop->bl)[ipos]),bpos);	/* flip bit */
-  }
-  
-  for (k=0; k<pop->size; k++) fitness(&((pop->bl)[k])); /* update fitness for mutated population */
-  pop->avfitness=avfitness(pop);                        /* average fitness in mutated population */
-  blfitest=fitestinpop(pop);		                /* fittest in population */
-  pop->maxfitness=blfitest.fitness;                     /* maximal fitness in mutated population */
-  pop->nterm=nterminalpop(pop);                         /* number of terminal state in mutated population */
-  
-}  
-
-
 /* find fittest in a population */
-struct bitlist fitestinpop(struct population *pop)
+bitlist fitestinpop(population *pop)
 {
   float fmax;
   int pos, i;
@@ -77,10 +22,10 @@ struct bitlist fitestinpop(struct population *pop)
 
   return (pop->bl)[pos];
 }  
+  
       
-
 /* find average fitness of a population */
-float avfitness(struct population *pop)
+float avfitness(population *pop)
 {
   float fsum=0.;
   int i;
@@ -88,27 +33,81 @@ float avfitness(struct population *pop)
   for (i=0; i<pop->size; i++) fsum=fsum+((pop->bl)[i]).fitness;
 
   return fsum/pop->size;
-}  
-  
+} 
+
 
 /* find number of terminal state in population */
-int nterminalpop(struct population *pop)
+int nterminalpop(population *pop)
 {
-  int i, nterm;
+  int i,nterm;
 
   nterm=0;
-  for (i=0; i<pop->size; i++)
-    if (((pop->bl)[i]).terminal) nterm++;
+  for (i=0; i<pop->size; i++) if (((pop->bl)[i]).terminal) nterm++;
 
   return nterm;
+}   
+
+
+/* generate a random population of size popsize */
+population randompop(int popsize)
+{
+  int size, i;
+  population pop;
+  bitlist blfitest;
+
+  size=((popsize>POPSIZE) ? POPSIZE : popsize);
+  for (i=0; i<size; i++) pop.bl[i]=randomstate();
+  pop.size=size;
+
+  /* compute average and maximal fitness for random population */
+  pop.avfitness=avfitness(&pop);    /* average fitness in population */
+  blfitest=fitestinpop(&pop);		/* fittest in population */
+  pop.maxfitness=blfitest.fitness;  /* maximal fitness in population */
+  pop.nterm=nterminalpop(&pop);     /* number of terminal state in mutated population */
+  
+  return pop;
+}  
+
+
+/* sort a population by fitness */
+void sortpop(population *pop)
+{
+  qsort(pop->bl,pop->size,sizeof(bitlist),compbitlist);
+}
+
+
+/* mutate a population */
+void mutatepop(population *pop, float mutrate)
+{
+  int len, nbits, nmut, i, k, pos, ipos, bpos;
+  bitlist blfitest;
+
+  len=((pop->bl)[0]).len;     /* length of bitlist, assume they are the same across population */
+  nbits=len*(pop->size);      /* total number of bits in population */
+  nmut=round(nbits*mutrate);  /* number of bits to be mutated */
+
+  /* run over mutations */
+  for (i=0; i<nmut; i++) {
+    pos=randomint(0,nbits);			    /* random bit position in entire population */
+    ipos=pos/len;       	     	    /* individual where mutation occurs */
+    bpos=pos%len;          			    /* bit position in individual */
+    flipbit(&((pop->bl)[ipos]),bpos);	/* flip bit */
+  }
+  
+  for (k=0; k<pop->size; k++) fitness(&((pop->bl)[k])); /* update fitness for mutated population */
+  pop->avfitness=avfitness(pop);                        /* average fitness in mutated population */
+  blfitest=fitestinpop(pop);		                     /* fittest in population */
+  pop->maxfitness=blfitest.fitness;                     /* maximal fitness in mutated population */
+  pop->nterm=nterminalpop(pop);                         /* number of terminal state in mutated population */
+  
 }  
 
 
 /* generate the next population from a given one by selection, crossing and mutation */
-void nextpop(struct population pop, struct population *newpop, int meth, int numcuts, int keepfitest,
+void nextpop(population pop, population *newpop, int meth, int numcuts, int keepfitest,
 	     float mutrate, float alpha)
 {
-  struct bitlist blfitest, bl1, bl2;
+  bitlist blfitest, bl1, bl2;
   float fmax, fav, df, p[POPSIZE];
   int n, len, k, i, i1, i2, j, cutpos[NUMCUTS];
 
