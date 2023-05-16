@@ -1,5 +1,5 @@
 /*  ======================================================================  */
-/*  ==========	     			   	          	==========  */
+/*  ==========	     			   	  	        ==========  */
 /*  ==========         F I T N E S S   F U N C T I O N          ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
@@ -64,7 +64,7 @@ int rankOfMatrix(int R, int C, int mat[R][C])
 }
 
 /* compute the dimension of a polytope from its pointlist */
-int dimensionOfPolytope(struct pointlist pl)
+int dimensionOfPolytope(pointlist pl)
 {
     int i, j, mat[pl.len][POLYDIM];
     
@@ -80,11 +80,11 @@ int dimensionOfPolytope(struct pointlist pl)
 }
 
 /* compute the fitness of a polytope from its bitlist */
-void fitness(struct bitlist *bl)
+void fitness(bitlist *bl)
 {
-  float score;
-  struct pointlist pl;
   int dim;
+  float score;
+  pointlist pl;
   
   /* compute the list of points from the bitlist */
   pl = bts2pts(*bl); 
@@ -112,7 +112,7 @@ void fitness(struct bitlist *bl)
   
     /* define the points */
     for(i=0; i<pl.len; i++) for(j=0; j<POLYDIM; j++) _P->x[i][j]=pl.points[i][j];
-
+	
     /* find the bounding hyperplane equations of the polytope */
     IP=Find_Equations(_P,&V,E); 
   	
