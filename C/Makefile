@@ -1,13 +1,17 @@
 # 				M A K E  F I L E
 
-SOURCES= Rat.c Vertex.c Polynf.c bitlist.c fitness.c population.c evolution.c
-OBJECTS= $(SOURCES:.c=.o)
+CC = gcc
 
 LIBS = -lm
-
 FLAGS = -g -O0
 
-CC=cc 
+SOURCES = Rat.c Vertex.c Polynf.c bitlist.c fitness.c population.c evolution.c
+OBJECTS = $(SOURCES:.c=.o)
+
+all: poly_gen gen_poly
+
+poly_gen: $(OBJECTS)
+	$(CC) -shared -o poly_gen.so $(OBJECTS)
 
 gen_poly: gen_poly.o  $(OBJECTS)  Global.h
 	$(CC) $(FLAGS) -o  gen_poly.x  gen_poly.o  $(OBJECTS) $(LIBS)
