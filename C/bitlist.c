@@ -131,9 +131,6 @@ bitlist randomstate()
   bitlist bl;
   pointlist pl;
   
-  /* set random number generator seed */
-  srand(clock()); 
-  
   /* randomly generate points */
   for(i=0; i<MAXNVRTS; i++) for(j=0; j<POLYDIM; j++) pl.points[i][j] = randomint(MIN,MIN-1+pow(2,BINLEN));
   pl.len = MAXNVRTS;
