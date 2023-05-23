@@ -4,16 +4,22 @@ This package is designed to generate reflexive polytopes of a certain type using
 
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
+If you experience any issues, please email elli.heyes@city.ac.uk.
 
-# Installation:
+# C Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
 - Step 1: Download the zipped file for this package from GitHub.
 - Step 2: Unzip the file and move it somewhere convenient in your computer.
-- Step 3: From the command line move to the file directory. 
+- Step 3: From the command line move to the file directory and then inside the C folder. 
 - Step 4: Type 'make' and hit Enter. This should compile all the necessary files in the package.
 - Step 5: To run the main function within the gen_poly.c file simply type './gen_poly.x' and hit Enter. 
 
+# Python Installation:
+- Step 0: Complete Steps 0-2 from the "C Installation" instructions above.
+- Step 1: In python set the file directory to the location of the Python folder. 
+- Step 2: Install the functions from poly_genetic by inputting "from poly_genetic import *" at the top of the file.
+- Step 3: You may now call any function that is defined within the "poly_genetic.py" file.
 
 # General Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
@@ -31,7 +37,9 @@ To install this package and use it on your own machine follow these simple steps
 - The content in the files Polynf.c, Rat.c, Rat.h and Vertex.c have been copied from the source code of 
   PALP software. More information on this package can be found on the website: http://hep.itp.tuwien.ac.at/~kreuzer/CY/.
   
-- The content of the bitlist.c, evolution.c and population.c have been copied from ...
+- The content in the files bitlist.c, evolution.c and population.c have been copied from ...
+
+- 
 
 # bitlist.c
 
@@ -91,7 +99,7 @@ the convex hull. It finds the bounding hyperplanes, the vertices, the full list 
 
 
 # Rat.c & Rat.h
-
+The functions defined in this file deal with rational operations.
 
 
 # Polynf.c
