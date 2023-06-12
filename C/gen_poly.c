@@ -14,7 +14,7 @@ int main (int narg, char* fn[]){
   srand(clock()); 
   
   /* repeated evolution of a random initial population, extracting terminal states */
-  bitlist * bl = searchenv(1000, NUMGEN, POPSIZE, ROULETTE, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITOR, &n); 
+  bitlist * bl = searchenv(1000, NUMGEN, POPSIZE, METHOD, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITOR, &n); 
 
   return 0;
 } 
