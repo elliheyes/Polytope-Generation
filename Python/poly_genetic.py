@@ -4,7 +4,7 @@ import os
 import subprocess
 
 # define path to directory
-path='/Users/elliheyes/Downloads/Polytope-Generation-main/'
+path='.../Polytope-Generation-main/'
 os.chdir(path+'C/')
 
 #%% Define the global parameters
@@ -197,7 +197,7 @@ poly_gen.removeredundancy.restype = c_void_p
 poly_gen.removeredundancy.argtypes = [POINTER(bitlist), POINTER(c_int)]
 
 poly_gen.searchenv.restype = POINTER(bitlist)
-poly_gen.searchenv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_int, c_float, c_float, c_int, POINTER(c_int)]
+poly_gen.searchenv.argtypes = [c_int, c_int, c_int, c_int, c_int, c_int, c_float, c_float, c_int, POINTER(c_int)]
 
 # define pthe python functions
 
@@ -253,7 +253,7 @@ def removeredundancy(bl,n):
     return poly_gen.removeredundancy(bl,n)
 
 # function that repeatedly evolves random initial populations, extracting terminal states, removing redundancy and writing to file
-def searchenv(numrun, numevol):
+def searchenv(numrun):
     n = ct.c_int(0)
     nptr = ct.pointer(n)
-    return poly_gen.searchenv(numrun, numevol, NUMGEN, POPSIZE, METHOD, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITOR, nptr);
+    return poly_gen.searchenv(numrun, NUMGEN, POPSIZE, METHOD, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA, MONITOR, nptr);
