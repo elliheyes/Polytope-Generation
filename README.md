@@ -23,9 +23,9 @@ To install this package and use it on your own machine follow these simple steps
 
 # General Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
-  extract the terminal states (i.e. reflexive polytopes), reduce the list using the normal form,
-  and repeat this several times. The reduced list of output reflexive polytopes are written to a file 
-  and the number of terminal states generated after each evolution, plus the total number of reduced
+  extract the terminal states (i.e. reflexive polytopes), remove redundancy in the list by computing 
+  the normal form, and repeat this several times. The reduced list of output reflexive polytopes are written 
+  to a file and the number of terminal states generated after each evolution, plus the total number of reduced
   terminal states are also written to a file.
   
 - To specify the type of reflexive polytopes you would like to generate, such as the polytope dimension,
@@ -39,26 +39,7 @@ To install this package and use it on your own machine follow these simple steps
   
 - The content in the files bitlist.c, evolution.c and population.c have been copied from ...
 
-- 
-
-# bitlist.c
-
-The functions defined in this file deal with bitlists, including converting a polytope defined by 
-integer vertex coordinates into a bitlist, generating a random bitlist state, determining whether 
-two bitlists define the same polytope, printing a bitlist to a file, etc.
-
-
-# population.c
-
-The functions defined in this file deal with populations of bitlists, for instance generating a random
-population, randomly the bitlists in a population mutating, ranking individuals in a population by their 
-fitness, and updating a population to the next generation.
-
-
-# fitness.c
-
-This file contains the fitness function of the genetic algorithm, which determines how close a bitlist 
-is from defining a reflexive polytope. 
+# Fitness
 
 There are several components of the fitness function that can be turned
 on or off by the weight parameters. The two main components which should always remain on are the distance of 
@@ -83,38 +64,5 @@ parameters Global.h accordingly.
     not have a h11 hodge number equal to H11. This causes the genetic algorithm to generate polytopes 
     of a given hodge number. Similarly for H12_WEIGHT, H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
 
-
-# evolution.c
-
-The functions in this file evolve an intitial population for a number of generations, extract the terminal states from a
-population list, and remove the redundancy in a list of terminal states. These searchenv function is the main function 
-of this package that repeatedly evolves an initial population, extracts terminal states, removes redundancy and saves the 
-information to a file.
-
-
-# Vertex.c
-
-The functions defined in this file, taken from PALP, construct a poltope from a list of integer vertex coordinates by taking
-the convex hull. It finds the bounding hyperplanes, the vertices, the full list of points, etc. 
-
-
-# Rat.c & Rat.h
-The functions defined in this file deal with rational operations.
-
-
-# Polynf.c
-
-The functions defined in this file, taken from PALP, allow one to compute the normal form of a polytope which is used to determine
-whether two polytopes are equivalent and therefore remove the degeneracy in a list of refelxive polytpoes. 
-
-
-# Global.h
-
-The global file defines the global parameters, data structures and prototypes for the various functions. 
-
-
-# gen_poly.c
-
-This file includes the main function.
     
 
