@@ -236,47 +236,75 @@ The vertex permutation list.
 
 
 
-/* convert a points list into a bit list after adding max */
 bitlist pts2bts(pointlist pl);
+/* 
+convert a points list into a bit list after adding max 
+*/
 
-/* convert a bit list into a points list and subtract max */
 pointlist bts2pts(bitlist bl);
+/* 
+convert a bit list into a points list and subtract max 
+*/
 
-/* generate a random integer in a range from min to max */
 int randomint(int min, int max);
+/* 
+generate a random integer in a range from min to max 
+*/
 
-/* generate a random choice for integers 0,...,len-1 for a probability distribution p */
 int randomchoice(float p[POPSIZE], int len);
+/* 
+generate a random choice for integers 0,...,len-1 for a probability distribution p 
+*/
 
-/* write a bitlist bl to a file with file pointer fp */
 void fprintbitlist(FILE *fp, bitlist bl);
+/* 
+write a bitlist bl to a file with file pointer fp 
+*/
 
-/* read bitlists from a file */
 bitlist * freadbitlist(char *filename, int len);
+/* 
+read bitlists from a file 
+*/
 
-/* flips bit in position pos for a bitlist bl */
 void flipbit(bitlist *bl, int pos);
+/* 
+flips bit in position pos for a bitlist bl 
+*/
 
-/* crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts */
 void crossbitlists(bitlist *bl1, bitlist *bl2, int numcuts, int cuts[NUMCUTS]);
+/* 
+crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts 
+*/
 
-/* the randomstate function which generates a random state */
 bitlist randomstate();
+/* 
+the randomstate function which generates a random state 
+*/
 
-/* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2);
+/* 
+compare two bistlist by their fitness
+*/
 
-/* compute the normal form of a polytope from its bitlist */
 NormalForm normalform(bitlist bl);
+/* 
+compute the normal form of a polytope from its bitlist 
+*/
 
-/* decide if two normal forms are equal */
 int NFsequal(NormalForm NF1, NormalForm NF2);
+/* 
+decide if two normal forms are equal 
+*/
 
-/* decide if two bistlist are identical */
 int bitlistsequal(bitlist bl1, bitlist bl2);
+/* 
+decide if two bistlist are identical 
+*/
 
-/* decide if two bistlist describe equivalent polytopes */
 int bitlistsequiv(bitlist bl1, bitlist bl2);
+/* 
+decide if two bistlist describe equivalent polytopes 
+*/
   
   
   
@@ -284,15 +312,21 @@ int bitlistsequiv(bitlist bl1, bitlist bl2);
 
 
 
-/* generate a random population of size popsize */
 population randompop(int popsize);
+/* 
+generate a random population of size popsize 
+*/
 
-/* find average fitness of a population */
 float avfitness(population *pop);
+/* 
+find average fitness of a population 
+*/
 
-/* generate the next population from a given one */
 void nextpop(population pop, population *newpop, int meth, int numcuts, int keepfitest,
 	     float mutrate, float alpha);
+/* 
+generate the next population from a given one 
+*/
 
 
 
@@ -300,30 +334,42 @@ void nextpop(population pop, population *newpop, int meth, int numcuts, int keep
 
 
 
-/* genetically evolve a population */
 population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
 			      int keepfitest, float mutrate, float alpha, int monitor);
+/* 
+generate the next population from a given one 
+*/
 
-/* select terminal states from a population */
 bitlist * termstates(population *evol, int numgen, int *numterm);
+/* 
+select terminal states from a population 
+*/
 
-/* remove redundqncy in list of bitlists */
 void removeredundancy(bitlist *bl, int *len);
+/* 
+remove redundqncy in list of bitlists 
+*/
 
-/* select terminal states from a population and remove redundancy */
 bitlist * termstatesred(population *evol, int numgen, int *numterm);
+/* 
+select terminal states from a population and remove redundancy 
+*/
 			   
-/* repeated evolution of a random initial population, extracting terminal states */
 bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm);
+/* 
+repeated evolution of a random initial population, extracting terminal states 
+*/
 			   
 
 /*  ============             F I T N E S S               ============  */
 
 
 
-/* the fitness function which returns the fitness of a bitlist */
 void fitness(bitlist * bl);
+/* 
+the fitness function which updates the fitness of a bitlist 
+*/
 
 
 
