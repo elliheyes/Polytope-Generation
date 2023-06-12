@@ -28,8 +28,7 @@
 #define POPSIZE 500       /* population size */
 #define NUMGEN 500        /* number of generations */
 #define NUMCUTS 1         /* number of cuts in a crossing */
-#define RANKING 0         /* macro for ranking method to select breeding pairs */
-#define ROULETTE 1        /* macro for roulette method to select breading pairs */
+#define METHOD 0          /* macro for ranking (0) or roulette (1) method to select breeding pairs */
 #define MUTRATE 0.005     /* mutation rate */
 #define ALPHA 3.0         /* value of alpha parameter in selection probability */
 #define KEEPFITEST 1      /* copy fitest individual into next population (1) or don't (0) */
