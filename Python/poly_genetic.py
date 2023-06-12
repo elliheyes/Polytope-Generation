@@ -148,17 +148,11 @@ poly_gen.pts2bts.argtypes = [pointlist]
 poly_gen.bts2pts.restype = pointlist
 poly_gen.bts2pts.argtypes = [bitlist]
 
-poly_gen.normalform.restype = normal_form
-poly_gen.normalform.argtypes = [bitlist]
-
 poly_gen.bitlistsequiv.restype = c_int
 poly_gen.bitlistsequiv.argtypes = [bitlist, bitlist]
 
 poly_gen.randompop.restype = population
 poly_gen.randompop.argtypes = [c_int]
-
-poly_gen.nextpop.restype = c_void_p
-poly_gen.nextpop.argtypes = [population, POINTER(population), c_int, c_int, c_int, c_float, c_float]
 
 poly_gen.evolvepop.restype = POINTER(population * NUMGEN)
 poly_gen.evolvepop.argtypes = [population, c_int, c_int, c_int, c_int, c_float, c_float, c_int]
@@ -189,10 +183,6 @@ def pts2bts(pl):
 def bts2pts(bl):
     return poly_gen.bts2pts(bl)
 
-# function that, given a bitlist, returns the corresponding normal form 
-def normalform(bl):
-    return poly_gen.normalform(bl)
-
 # function that determines whether two bitlists describe equivalent polytopes
 def bitlistequiv(bl1,bl2):
     return poly_gen.bitlistsequiv(bl1,bl2)
@@ -200,13 +190,6 @@ def bitlistequiv(bl1,bl2):
 # function that returns a randomly generated population
 def randompop():
     return poly_gen.randompop(POPSIZE)
-
-# function that, given a population, returns the next mutated population
-def nextpop(pop):
-    nextpop = randompop()
-    nexpopptr = ct.pointer(nextpop)
-    poly_gen.nextpop(pop, nexpopptr, METHOD, NUMCUTS, KEEPFITEST, MUTRATE, ALPHA)
-    return nextpop
 
 # function that, evolves an initial population over NUMGEN generations and returns the list of populations
 def evolvepop(initialpop):
