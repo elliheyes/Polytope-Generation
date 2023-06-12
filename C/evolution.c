@@ -7,6 +7,15 @@
 #include "Global.h"
 
 
+/* monitor evolution of a population */
+void monitorevol(int gen, population *pop)
+{
+  if (!(gen%10)) printf("Gen    AvFit     MaxFit    #Term\n");
+  printf("%3i    %2.4f    %2.4f    %3i\n",gen,pop->avfitness,pop->maxfitness,pop->nterm);
+  fflush(stdout);
+}  
+
+
 /* genetically evolve a population */
 population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
 			      int keepfitest, float mutrate, float alpha, int monitor)
@@ -39,15 +48,6 @@ population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
   if (monitor)printf("\nNumber of terminal states: %i\n",nterm);
   
   return evol;
-}  
-
-
-/* monitor evolution of a population */
-void monitorevol(int gen, population *pop)
-{
-  if (!(gen%10)) printf("Gen    AvFit     MaxFit    #Term\n");
-  printf("%3i    %2.4f    %2.4f    %3i\n",gen,pop->avfitness,pop->maxfitness,pop->nterm);
-  fflush(stdout);
 }  
 
 
