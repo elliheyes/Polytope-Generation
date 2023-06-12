@@ -231,9 +231,7 @@ The vertex permutation list.
 */
 
 
-
 /*  ============              B I T L I S T                ============  */
-
 
 
 bitlist pts2bts(pointlist pl);
@@ -307,9 +305,7 @@ decide if two bistlist describe equivalent polytopes
 */
   
   
-  
 /*  ============              P O P U L A T I O N                ============  */
-
 
 
 population randompop(int popsize);
@@ -329,9 +325,7 @@ generate the next population from a given one
 */
 
 
-
 /*  ============              E V O L U T I O N                ============  */
-
 
 
 population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
@@ -365,16 +359,13 @@ repeated evolution of a random initial population, extracting terminal states
 /*  ============             F I T N E S S               ============  */
 
 
-
 void fitness(bitlist * bl);
 /* 
 the fitness function which updates the fitness of a bitlist 
 */
 
 
-
 /*  ============             V E R T E X                ============  */
-
 
 
 Long Eval_Eq_on_V(Equation *E, Long *V, int n);
@@ -408,8 +399,8 @@ int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI);
 Fast computation of FaceInfo and Hodge numbers.
 */
 
-/*  ============             N O R M A L   F O R M                ============  */
 
+/*  ============             N O R M A L   F O R M                ============  */
 
 
 void  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F, Long NF[POLYDIM][VERT_Nmax]);
