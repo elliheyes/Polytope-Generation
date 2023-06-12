@@ -66,40 +66,16 @@ for i in range(len(lines)):
         line = "#define NUMGEN " + str(NUMGEN) + "\n"
     if "#define NUMCUTS" == line[:15]:
         line = "#define NUMCUTS " + str(NUMCUTS) + "\n"
-    if "#define RANKING" == line[:15]:
-        if METHOD == 0:
-            line = "#define RANKING " + str(1) + "\n"
-        else:
-            line = "#define RANKING " + str(0) + "\n"
-    if "#define ROULETTE" == line[:16]:
-        if METHOD == 0:
-            line = "#define ROULETTE " + str(0) + "\n"
-        else:
-            line = "#define ROULETTE " + str(1) + "\n"
+    if "#define METHOD" == line[:14]:
+        line = "#define METHOD " + str(METHOD) + "\n"
     if "#define MUTRATE" == line[:15]:
         line = "#define MUTRATE " + str(MUTRATE) + "\n"
     if "#define ALPHA" == line[:13]:
         line = "#define ALPHA " + str(ALPHA) + "\n"
     if "#define KEEPFITEST" == line[:18]:
-        if KEEPFITEST == 0:
-            line = "#define KEEPFITEST " + str(0) + "\n"
-        else:
-            line = "#define KEEPFITEST " + str(1) + "\n"
-    if "#define DONTKEEPFITEST" == line[:22]:
-        if KEEPFITEST == 0:
-            line = "#define DONTKEEPFITEST " + str(1) + "\n"
-        else:
-            line = "#define DONTKEEPFITEST " + str(0) + "\n"
-    if "#define MONITORON" == line[:17]:
-        if MONITOR == 0:
-            line = "#define MONITORON " + str(0) + "\n"
-        else:
-            line = "#define MONITORON " + str(1) + "\n"
-    if "#define MONITOROFF" == line[:18]:
-        if MONITOR == 0:
-            line = "#define MONITOROFF " + str(1) + "\n"
-        else:
-            line = "#define MONITOROFF " + str(0) + "\n"
+        line = "#define KEEPFITEST " + str(KEEPFITEST) + "\n"
+    if "#define MONITOR" == line[:15]:
+        line = "#define MONITOR " + str(MONITOR) + "\n"
     if "#define NVERTS_WEIGHT" == line[:21]:
         line = "#define NVERTS_WEIGHT " + str(NVERTS_WEIGHT) + "\n"
     if "#define NVERTS " == line[:15]:
