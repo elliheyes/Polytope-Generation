@@ -137,39 +137,37 @@ these routines are designed to simulate the above definitions.
 
 /*  ============           	S T R U C T U R E S              ============  */
 
-struct binary
-{
-  int list[BINLEN];  /* the actual binary list */
-};
+typedef struct {int list[BINLEN];} binary;
+/* 
+Binary list object.
+*/
 
-struct pointlist
-{
-  int len;                        /* the number of points */
-  int points[MAXNVRTS][POLYDIM];  /* the actual point list */
-};
+typedef struct {int len; int points[MAXNVRTS][POLYDIM];} pointlist;
+/*
+Point list of polytope of length len.
+*/
 
-struct bitlist
-{
-  int len;                            /* number of bits in bitlist */
-  int bits[MAXNVRTS*POLYDIM*BINLEN];  /* the actual bitlist */
-  float fitness;                      /* fitness of bitlist */
-  int terminal;                       /* terminal or not */
-};
+typedef struct {int len; int bits[MAXNVRTS*POLYDIM*BINLEN]; float fitness; int terminal;} bitlist;
+/*
+Bitlist data object.
+bl.bits is the actual bitlist of length bl.len.
+bl.fitness is the fitness of the corresponding polytope.
+bl.terminal is 1 is the state is terminal and 0 otherwise.
+*/
 
-struct population
-{
-  int size;                    /* size of population */
-  float maxfitness;            /* maximal fitness in population */
-  float avfitness;             /* average fitness in population */
-  int nterm;                   /* number of terminal states in population */
-  struct bitlist bl[POPSIZE];  /* the actual population */
-};  
+typedef struct {int size; float maxfitness; float avfitness; int nterm; bitlist bl[POPSIZE];} population;  
+/* 
+Population data object.
+pop.bl is the list of bitlists of length pop.size.
+pop.maxfitness and pop.avfitness is the maximum and average fitness respectively.
+pop.nterm is the number of terminal states in the population.
+*/
 
-struct NormalForm
-{
-  int nv;                       /* the number of vertices */        
-  Long x[POLYDIM][VERT_Nmax];  /* the actual normal form vertex matrix */
-}; 
+typedef struct {int nv; Long x[POLYDIM][VERT_Nmax];} NormalForm; 
+/* 
+Data object for the normal form of a polytope.
+NF.x is the d x Nv normal form matrix and NF.nv is the number of vertices, i.e. Nv.
+*/
 
 typedef struct {int n, np; Long x[POINT_Nmax][POLYDIM];} PolyPointList;
 /*
@@ -239,19 +237,19 @@ The vertex permutation list.
 
 
 /* convert a decimal number into a binary list */
-struct binary decimal2binary(int num);
+binary decimal2binary(int num);
 
 /* convert a binary list into a decimal number */
-int binaryToDecimal(struct binary bin);
+int binaryToDecimal(binary bin);
 
 /* convert a points list into a bit list after adding max */
-struct bitlist pts2bts(struct pointlist pl);
+bitlist pts2bts(pointlist pl);
 
 /* convert a bit list into a points list and subtract max */
-struct pointlist bts2pts(struct bitlist bl);
+pointlist bts2pts(bitlist bl);
 
 /* generate a random bitlist of lenght len */
-struct bitlist randombitlist(int len);
+bitlist randombitlist(int len);
 
 /* generate a random integer in a range from min to max */
 int randomint(int min, int max);
@@ -260,43 +258,43 @@ int randomint(int min, int max);
 int randomchoice(float p[POPSIZE], int len);
 
 /* write a bitlist bl to a file with file pointer fp */
-void fprintbitlist(FILE *fp, struct bitlist bl);
+void fprintbitlist(FILE *fp, bitlist bl);
 
 /* read bitlists from a file */
-struct bitlist * freadbitlist(char *filename, int len);
+bitlist * freadbitlist(char *filename, int len);
 
 /* flips bit in position pos for a bitlist bl */
-void flipbit(struct bitlist *bl, int pos);
+void flipbit(bitlist *bl, int pos);
 
 /* copies the bits in bitlist bl from position pos1 to pos2-1 into a new bitlist */
-struct bitlist copybitlist(struct bitlist bl, int pos1, int pos2);
+bitlist copybitlist(bitlist bl, int pos1, int pos2);
 
 /* pastes bitlist blpaste into bitlist bl at position pos, overwriting previous content in bl */
-void pastebitlist(struct bitlist *bl, struct bitlist blpaste, int pos);
+void pastebitlist(bitlist *bl, bitlist blpaste, int pos);
 
 /* a simple insertion sort of an integer array into ascending order */
 void isort(int arr[], int len);
 
 /* crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts */
-void crossbitlists(struct bitlist *bl1, struct bitlist *bl2, int numcuts, int cuts[NUMCUTS]);
+void crossbitlists(bitlist *bl1, bitlist *bl2, int numcuts, int cuts[NUMCUTS]);
 
 /* the randomstate function which generates a random state */
-struct bitlist randomstate();
+bitlist randomstate();
 
 /* compare two bistlist by their fitness */
 int compbitlist(const void *p1, const void *p2);
 
 /* compute the normal form of a polytope from its bitlist */
-struct NormalForm normalform(struct bitlist bl);
+NormalForm normalform(bitlist bl);
 
 /* decide if two normal forms are equal */
-int NFsequal(struct NormalForm NF1, struct NormalForm NF2);
+int NFsequal(NormalForm NF1, NormalForm NF2);
 
 /* decide if two bistlist are identical */
-int bitlistsequal(struct bitlist bl1, struct bitlist bl2);
+int bitlistsequal(bitlist bl1, bitlist bl2);
 
 /* decide if two bistlist describe equivalent polytopes */
-int bitlistsequiv(struct bitlist bl1, struct bitlist bl2);
+int bitlistsequiv(bitlist bl1, bitlist bl2);
   
   
   
@@ -305,25 +303,25 @@ int bitlistsequiv(struct bitlist bl1, struct bitlist bl2);
 
 
 /* generate a random population of size popsize */
-struct population randompop(int popsize);
+population randompop(int popsize);
 
 /* sort a population by fitness */
-void sortpop(struct population *pop);
+void sortpop(population *pop);
 
 /* mutate a population */
-void mutatepop(struct population *pop, float mutrate);
+void mutatepop(population *pop, float mutrate);
 
 /* find fitest in a population */
-struct bitlist fitestinpop(struct population *pop);
+bitlist fitestinpop(population *pop);
 
 /* find average fitness of a population */
-float avfitness(struct population *pop);
+float avfitness(population *pop);
 
 /* find number of terminal state in population */
-int nterminalpop(struct population *pop);
+int nterminalpop(population *pop);
 
 /* generate the next population from a given one */
-void nextpop(struct population pop, struct population *newpop, int meth, int numcuts, int keepfitest,
+void nextpop(population pop, population *newpop, int meth, int numcuts, int keepfitest,
 	     float mutrate, float alpha);
 
 
@@ -333,23 +331,23 @@ void nextpop(struct population pop, struct population *newpop, int meth, int num
 
 
 /* genetically evolve a population */
-struct population * evolvepop(struct population initialpop, int numgen, int meth, int numcuts,
+population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
 			      int keepfitest, float mutrate, float alpha, int monitor);
 
 /* monitor evolution of a population */
-void monitorevol(int gen, struct population *pop);
+void monitorevol(int gen, population *pop);
 
 /* select terminal states from a population */
-struct bitlist * termstates(struct population *evol, int numgen, int *numterm);
+bitlist * termstates(population *evol, int numgen, int *numterm);
 
 /* remove redundqncy in list of bitlists */
-void removeredundancy(struct bitlist *bl, int *len);
+void removeredundancy(bitlist *bl, int *len);
 
 /* select terminal states from a population and remove redundancy */
-struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm);
+bitlist * termstatesred(population *evol, int numgen, int *numterm);
 			   
 /* repeated evolution of a random initial population, extracting terminal states */
-struct bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int numcuts,
+bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm);
 			   
 
@@ -358,7 +356,7 @@ struct bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int nu
 
 
 /* the fitness function which returns the fitness of a bitlist */
-void fitness(struct bitlist * bl);
+void fitness(bitlist * bl);
 
 
 
