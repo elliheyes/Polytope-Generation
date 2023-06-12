@@ -37,7 +37,7 @@ To install this package and use it on your own machine follow these simple steps
 - The content in the files Polynf.c, Rat.c, Rat.h and Vertex.c have been copied from the source code of 
   PALP software. More information on this package can be found on the website: http://hep.itp.tuwien.ac.at/~kreuzer/CY/.
   
-- The content in the files bitlist.c, evolution.c and population.c have been copied from ...
+- The content in the files bitlist.c, evolution.c and population.c have been copied from https://github.com/harveyThomas4692/GA-C.
 
 # Fitness
 
