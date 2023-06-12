@@ -236,20 +236,11 @@ The vertex permutation list.
 
 
 
-/* convert a decimal number into a binary list */
-binary decimal2binary(int num);
-
-/* convert a binary list into a decimal number */
-int binaryToDecimal(binary bin);
-
 /* convert a points list into a bit list after adding max */
 bitlist pts2bts(pointlist pl);
 
 /* convert a bit list into a points list and subtract max */
 pointlist bts2pts(bitlist bl);
-
-/* generate a random bitlist of lenght len */
-bitlist randombitlist(int len);
 
 /* generate a random integer in a range from min to max */
 int randomint(int min, int max);
@@ -265,15 +256,6 @@ bitlist * freadbitlist(char *filename, int len);
 
 /* flips bit in position pos for a bitlist bl */
 void flipbit(bitlist *bl, int pos);
-
-/* copies the bits in bitlist bl from position pos1 to pos2-1 into a new bitlist */
-bitlist copybitlist(bitlist bl, int pos1, int pos2);
-
-/* pastes bitlist blpaste into bitlist bl at position pos, overwriting previous content in bl */
-void pastebitlist(bitlist *bl, bitlist blpaste, int pos);
-
-/* a simple insertion sort of an integer array into ascending order */
-void isort(int arr[], int len);
 
 /* crosses bitlists bl1 and bl2, with numcuts number of cuts at positions specified in array cuts */
 void crossbitlists(bitlist *bl1, bitlist *bl2, int numcuts, int cuts[NUMCUTS]);
@@ -305,20 +287,8 @@ int bitlistsequiv(bitlist bl1, bitlist bl2);
 /* generate a random population of size popsize */
 population randompop(int popsize);
 
-/* sort a population by fitness */
-void sortpop(population *pop);
-
-/* mutate a population */
-void mutatepop(population *pop, float mutrate);
-
-/* find fitest in a population */
-bitlist fitestinpop(population *pop);
-
 /* find average fitness of a population */
 float avfitness(population *pop);
-
-/* find number of terminal state in population */
-int nterminalpop(population *pop);
 
 /* generate the next population from a given one */
 void nextpop(population pop, population *newpop, int meth, int numcuts, int keepfitest,
@@ -333,9 +303,6 @@ void nextpop(population pop, population *newpop, int meth, int numcuts, int keep
 /* genetically evolve a population */
 population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
 			      int keepfitest, float mutrate, float alpha, int monitor);
-
-/* monitor evolution of a population */
-void monitorevol(int gen, population *pop);
 
 /* select terminal states from a population */
 bitlist * termstates(population *evol, int numgen, int *numterm);
@@ -364,39 +331,15 @@ void fitness(bitlist * bl);
 
 
 
-void Sort_VL(VertexNumList *V);
-/*
-Sorts the entries _V->v[i] in ascending order.
-*/
-
 Long Eval_Eq_on_V(Equation *E, Long *V, int n);
 /*
 Evaluates E on V, i.e. calculates \sum_{i=0}^{n-1} E->a[i] * V[i] + E->c.
-*/
-
-int  Vec_Greater_Than(Long *X, Long *Y, int n);
-/*
-Returns 1 if *X > *Y in the sense that X[i] > Y[i] for the first i where
-X[i] and Y[i] differ, returns 0 if *X < *Y and gives an error message if
-X[i] equals Y[i] for all i in {0,...n-1}.
-*/
-
-Equation EEV_To_Equation(Equation *E1, Equation *E2, Long *V, int n);
-/*
-Returns the equation describing the span of the vector V and the intersection
-of the hyperplanes corresponding to E1 and E2; n is the dimension.
 */
 
 void Make_VEPM(PolyPointList *P, VertexNumList *VNL, EqList *EL, PairMat PM);
 /*
 Calculates the matrix of pairings between the vertices in VNL and the
 equations in EL.
-*/
-
-void EL_to_PPL(EqList *EL, PolyPointList *DP, int *n);
-/*
-Converts *EL to the incomplete PolyPointList *DP corresponding to the dual
-polytope; *n is the dimension. 
 */
 
 int  Find_Equations(PolyPointList *P, VertexNumList *VNL, EqList *EL);
@@ -414,17 +357,6 @@ Given the vertex pairing matrix VPM, the EqList *E and the number nv of
 vertices, the complete list of lattice points *P is determined.
 */
 
-INCI Eq_To_INCI(Equation *E, PolyPointList *P, VertexNumList *VNL);
-/*
-Converts *E to an INCI.
-*/
-
-void Make_Incidence(PolyPointList *P, VertexNumList *VNL, EqList *EL,
-                    FaceInfo *FI);
-/*
-Creates the structure FaceInfo *FI from *P, *VNL and *EL.
-*/
-
 int QuickAnalysis(PolyPointList *_P, BaHo *_BH, FaceInfo *_FI);
 /*
 Fast computation of FaceInfo and Hodge numbers.
@@ -433,11 +365,6 @@ Fast computation of FaceInfo and Hodge numbers.
 /*  ============             N O R M A L   F O R M                ============  */
 
 
-
-void swap(int *i,int *j);
-/*
-Swaps *i and *j.
-*/
 
 void  Make_Poly_Sym_NF(PolyPointList *_P, VertexNumList *_V, EqList *_F, Long NF[POLYDIM][VERT_Nmax]);
 /*
