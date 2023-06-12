@@ -126,7 +126,7 @@ void nextpop(population pop, population *newpop, int meth, int numcuts, int keep
     /* compute selection probabilities p */
     
     /* ranking method */
-    if (meth==RANKING) {
+    if (meth==0) {
       sortpop(&pop);
       for (k=0; k<n; k++) p[k]=2*(1+(n-k-1)/(n-1)*(alpha-1))/(1+alpha)/n;
     }  
