@@ -50,7 +50,7 @@ does not satisfy the interior point property.
 
 On top of these two main components there are additional components one can include in the fitness to direct the 
 search for reflexive polytopes with specific properties. To turn on these additional components, amend the global
-parameters Global.h accordingly.
+parameters in Global.h if using C or in the poly_genetic.py file if using Python.
 
 -   NVERTS_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope
     does not have NVERTS number of vertices. This causes the genetic algorithm to generate 
