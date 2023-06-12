@@ -1,24 +1,24 @@
 /*  ======================================================================  */
-/*  ==========	     			   	  	     	==========  */
+/*  ==========	     			   	  		==========  */
 /*  ==========       E V O L U T I O N   F U N C T I O N S      ==========  */
 /*  ==========						        ==========  */
 /*  ======================================================================  */
 
-#include "Global.h"
+#include "Global_5d_6v.h"
 
 
 /* genetically evolve a population */
-population * evolvepop(population initialpop, int numgen, int meth, int numcuts, int keepfitest, 
-						float mutrate, float alpha, int monitor)
+struct population * evolvepop(struct population initialpop, int numgen, int meth, int numcuts,
+			      int keepfitest, float mutrate, float alpha, int monitor)
 {
   int gen, nterm;
-  population *evol;
+  struct population *evol;
 
    /* check validity of numgen */
   if (numgen>NUMGEN) numgen=NUMGEN;
   
   /* allocate memory for evolution */
-  evol = calloc(numgen,sizeof(population));
+  evol = calloc(numgen,sizeof(struct population));
   if (evol == NULL) {
     printf("evolvepop: memory allocation failed");
     exit(0);
@@ -43,7 +43,7 @@ population * evolvepop(population initialpop, int numgen, int meth, int numcuts,
 
 
 /* monitor evolution of a population */
-void monitorevol(int gen, population *pop)
+void monitorevol(int gen, struct population *pop)
 {
   if (!(gen%10)) printf("Gen    AvFit     MaxFit    #Term\n");
   printf("%3i    %2.4f    %2.4f    %3i\n",gen,pop->avfitness,pop->maxfitness,pop->nterm);
@@ -52,10 +52,10 @@ void monitorevol(int gen, population *pop)
 
 
 /* select terminal states from a population */
-bitlist * termstates(population *evol, int numgen, int *numterm)
+struct bitlist * termstates(struct population *evol, int numgen, int *numterm)
 {
   int i,j, k;
-  bitlist *bl;
+  struct bitlist *bl;
   
   /* find the number of terminal states */
   *numterm=0;
@@ -66,7 +66,7 @@ bitlist * termstates(population *evol, int numgen, int *numterm)
       }
  
    /* allocate memory for terminal states */
-  bl = calloc(*numterm,sizeof(bitlist)); 
+  bl = calloc(*numterm,sizeof(struct bitlist)); 
 
   /* store terminal states in allocated space */
   j=0;
@@ -81,7 +81,7 @@ bitlist * termstates(population *evol, int numgen, int *numterm)
 
 
 /* remove equality and equivalence redundancy in list of bitlists */
-void removeredundancy(bitlist *bl, int *len)
+void removeredundancy(struct bitlist *bl, int *len)
 {
   /* remove equality redundancy */
   int cnonred, cactive, red, k; 
@@ -100,7 +100,7 @@ void removeredundancy(bitlist *bl, int *len)
       cactive++;
     }
     *len=cnonred;
-    qsort(bl,cnonred,sizeof(bitlist),compbitlist);
+    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
   }
   
   /* remove equivalence redundancy */
@@ -119,15 +119,15 @@ void removeredundancy(bitlist *bl, int *len)
       cactive++;
     }
     *len=cnonred;
-    qsort(bl,cnonred,sizeof(bitlist),compbitlist);
+    qsort(bl,cnonred,sizeof(struct bitlist),compbitlist);
   }
 }
 
 
 /* select terminal states from a population and remove redundancy */
-bitlist * termstatesred(population *evol, int numgen, int *numterm)
+struct bitlist * termstatesred(struct population *evol, int numgen, int *numterm)
 {
-  bitlist *bl;
+  struct bitlist *bl;
 
   /* extract terminal states */
   bl=termstates(evol,numgen,numterm);
@@ -140,10 +140,10 @@ bitlist * termstatesred(population *evol, int numgen, int *numterm)
 
 
 /* select new terminal states from a generated list */
-void newtermstates(NormalForm * NFsOld, bitlist * blNew, int numtermOld, int len, int *numtermNew)
+void newtermstates(struct NormalForm * NFsOld, struct bitlist * blNew, int numtermOld, int len, int *numtermNew)
 {
   int cnew, cactive, old, k;
-  NormalForm NF;
+  struct NormalForm NF;
   
   cnew=0; cactive=0;
   while (cactive < len){
@@ -169,126 +169,94 @@ void newtermstates(NormalForm * NFsOld, bitlist * blNew, int numtermOld, int len
   }
   
   *numtermNew=cnew;
-  qsort(blNew,cnew,sizeof(bitlist),compbitlist);
+  qsort(blNew,cnew,sizeof(struct bitlist),compbitlist);
 } 
 
 
 /* repeated evolution of a random initial population, extracting terminal states */
-bitlist * searchenv(int numrun, int numevol, int numgen, int popsize, int meth, int numcuts,
+struct bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int numcuts,
 			   int keepfitest, float mutrate, float alpha, int monitor, int *numterm)
 {
-  int i, j, k, IP, crun, cevol, n1, n2, nterm1, nterm2;
-  population *evol;
-  bitlist *bl, *blterm1, *blterm2, *bltermOld1, *bltermOld2;
-  NormalForm *NFs, *NFsOld;
+  int i, j, k, IP, crun, n1, n2, nterm;
+  struct population *evol;
+  struct bitlist *bl, *blterm, *bltermOld;
+  struct NormalForm *NFs, *NFsOld;
   
   FILE * fp1 = fopen("Num_Terminal_States.txt","w");
   FILE * fp2 = fopen("Terminal_States.txt","w");
 
   /* main loop over runs */
-  nterm1=0;
+  nterm=0;
   for(crun=0; crun<numrun; crun++){
   
-    /* loop over evolutions */
-    nterm2=0;
-    for(cevol=0; cevol<numevol; cevol++){
-    
-      /* evolve random population */
-      evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
+  /* evolve random population */
+  evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
       
-      /* extract terminal states and remove redundancy */
-      bl=termstatesred(evol,numgen,&n2);
-      nterm2=nterm2+n2;
+  /* extract terminal states and remove redundancy */
+  bl=termstatesred(evol,numgen,&n1);
       
-      /* allocate or re-allocate memory for terminal states */
-      if(cevol==0) {
-        blterm2=calloc(nterm2,sizeof(bitlist));
-      }
-      else{
-        if(n2!=0){
-            bltermOld2=calloc(nterm2-n2,sizeof(bitlist));;
-            for (i=0; i< nterm2-n2; i++) bltermOld2[i]=blterm2[i];
-            free(blterm2);
-            blterm2=calloc(nterm2,sizeof(bitlist));
-            for (i=0; i< nterm2-n2; i++) blterm2[i]=bltermOld2[i];
-            free(bltermOld2);
-        }
-      }
+  /* allocate memory for terminal states and normal forms */
+  if(crun==0) {
+    nterm=n1;
+    blterm=calloc(nterm,sizeof(struct bitlist));
+    NFs=calloc(nterm,sizeof(struct NormalForm));
+  }
+  else{
+    /* select new terminal states */
+    newtermstates(NFs,bl,nterm,n1,&n2);
+    nterm=nterm+n2;
+  
+    /* re-allocate memory for terminal states and normal forms */
+    if(n2!=0){
+      bltermOld=calloc(nterm-n2,sizeof(struct bitlist));
+      NFsOld=calloc(nterm-n2,sizeof(struct NormalForm));
+      for (i=0; i<nterm-n2; i++){
+        bltermOld[i]=blterm[i];
+        NFsOld[i]=NFs[i];
+      } 
+      free(blterm);free(NFs);
+      blterm=calloc(nterm,sizeof(struct bitlist));
+      NFs=calloc(nterm,sizeof(struct NormalForm));
+      for (i=0; i<nterm-n2; i++){
+        blterm[i]=bltermOld[i];
+        NFs[i]=NFsOld[i];
+      } 
+      free(bltermOld);free(NFsOld);
+    }
+  }
     
-      /* load in new terminal states */
-      for (i=0; i<n2; i++) blterm2[nterm2-n2+i]=bl[i];
+  /* load in new terminal states and normal forms */
+  for (i=0; i<n2; i++){
+    blterm[nterm-n2+i]=bl[i];
+    NFs[nterm-n2+i]=normalform(bl[i]);
+  } 
+  
+  /* monitor */
+  if (monitor) {
+    if (!(crun%10)) printf("   Run     #Term     #AllTerm\n");
+    printf("%6i    %6i    %6i\n",crun,n1,nterm);
+    fflush(stdout);
+  }
+  
+  /* print number of terminal states to file */
+  fprintf(fp1,"%d %d\n",n1,nterm);
+  fflush(fp1);
+  
+  /* print terminal states to file */
+  for (i=0; i<n2; i++) fprintbitlist(fp2, bl[i]); 
 
-	  /* free allocated memory */ 
-      free(bl);free(evol);
-    }
-    
-    if(crun==0){
-      /* remove redundancy */
-      removeredundancy(blterm2, &nterm2);
-      n1=nterm2;
-      nterm1=n1;
-      
-      /* allocate memory for terminal states */
-      blterm1=calloc(nterm1,sizeof(bitlist));
-      
-      /* allocate memory for normal forms */
-      NFs=calloc(nterm1,sizeof(NormalForm));
-    }
-    else{
-      /* remove redundancy */
-      removeredundancy(blterm2, &nterm2);
-      
-      /* select new terminal states */
-      newtermstates(NFs,blterm2,nterm1,nterm2,&n1);
-      nterm1=nterm1+n1;
-      
-      /* re-allocate memory for terminal states and normal forms */
-      if(n1!=0){
-        bltermOld1=calloc(nterm1-n1,sizeof(bitlist));
-        NFsOld=calloc(nterm1-n1,sizeof(NormalForm));
-        for (i=0; i< nterm1-n1; i++){
-          bltermOld1[i]=blterm1[i];
-          NFsOld[i]=NFs[i];
-        };
-        free(blterm1);free(NFs);
-        blterm1=calloc(nterm1,sizeof(bitlist));
-        NFs=calloc(nterm1,sizeof(NormalForm));
-        for (i=0; i< nterm1-n1; i++){
-          blterm1[i]=bltermOld1[i];
-          NFs[i]=NFsOld[i];
-        };
-        free(bltermOld1);free(NFsOld);
-      }
-    }
-    
-    /* load in new terminal states and normal forms */
-    for (i=0; i<n1; i++){
-      blterm1[(nterm1)-n1+i] = blterm2[i];
-      NFs[(nterm1)-n1+i] = normalform(blterm2[i]);
-    }; 
-    
-    /* monitor */
-    if (monitor) {
-      if (!(crun%10)) printf("   Run     #Term     #AllTerm\n");
-      printf("%6i    %6i    %6i\n",crun,nterm2,nterm1);
-      fflush(stdout);
-    }
-    
-    /* print number of terminal states to file */
-    fprintf(fp1,"%d %d\n",nterm2,nterm1);
-    fflush(fp1);
-    
-    /* print terminal states to file */
-    for (i=0; i<n1; i++) fprintbitlist(fp2, blterm2[i]); 
+  /* free allocated memory */ 
+  free(bl);free(evol);
+
   }
   
   /* close files */
   fclose(fp1); fclose(fp2); 
   
   /* assign total number of reduced terminal states */
-  *numterm = nterm1;
+  *numterm = nterm;
 
   /* return list of reduced terminal states */
-  return blterm1; 
+  return blterm; 
 }
 
