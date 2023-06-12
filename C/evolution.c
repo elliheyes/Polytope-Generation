@@ -4,7 +4,7 @@
 /*  ==========						        ==========  */
 /*  ======================================================================  */
 
-#include "Global_5d_6v.h"
+#include "Global.h"
 
 
 /* genetically evolve a population */
