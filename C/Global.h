@@ -32,10 +32,8 @@
 #define ROULETTE 1        /* macro for roulette method to select breading pairs */
 #define MUTRATE 0.005     /* mutation rate */
 #define ALPHA 3.0         /* value of alpha parameter in selection probability */
-#define KEEPFITEST 1      /* copy fitest individual into next population */
-#define DONTKEEPFITEST 0  /* don't copy over fitest individual */
-#define MONITORON 1       /* terminal monitor on */
-#define MONITOROFF 0      /* terminal monitor off */
+#define KEEPFITEST 1      /* copy fitest individual into next population (1) or don't (0) */
+#define MONITOR 1         /* terminal monitor on (1) or off (0) */
 
 /* fitness weights */
 #define DIST_WEIGHT 1 
