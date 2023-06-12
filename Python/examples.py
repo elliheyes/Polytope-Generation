@@ -21,14 +21,6 @@ print(np.transpose(M))
 # convert point list back into bitlist
 random_bitlist_2 = pts2bts(random_pointlist)
 
-# convert the bitlist into its normal form
-NF = normalform(random_bitlist)
-print("Normal Form: ")
-NF_M = []
-for i in range(NF.Nv):
-    NF_M.append(NF.M[i][:])
-print(NF_M)
-
 # check whether the original bitlist and the converted bitlist are equivalent
 print("Equivalent: ",bitlistequiv(random_bitlist,random_bitlist_2))
 
@@ -38,13 +30,6 @@ print("Random Population: ")
 print("Maximum Fitness: ",random_pop.maxfitness)
 print("Average Fitness: ",random_pop.avfitness)
 print("Number of Terminal States: ",random_pop.nterm)
-
-# mutate the population
-next_pop = nextpop(random_pop)
-print("Next Population: ")
-print("Maximum Fitness: ",next_pop.maxfitness)
-print("Average Fitness: ",next_pop.avfitness)
-print("Number of Terminal States: ",next_pop.nterm)
 
 # evolve the random population
 evol = evolvepop(random_pop)
