@@ -2,6 +2,8 @@
 
 This package is designed to generate reflexive polytopes of a certain type using a genetic algorithm. 
 
+https://arxiv.org/pdf/2306.06159.pdf
+
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
 If you experience any issues, please email elli.heyes@city.ac.uk.
