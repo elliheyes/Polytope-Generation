@@ -90,7 +90,10 @@ void removeredundancy(bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-        if (bitlistsequal(bl[k],bl[cactive])) red=1;
+        if (bitlistsequal(bl[k],bl[cactive])) {
+	  red=1;
+	  break;
+	}
         k++;
       }
       if (!red) {
@@ -109,7 +112,10 @@ void removeredundancy(bitlist *bl, int *len)
     while (cactive < *len) {
       red=0; k=0;
       while (!red && k<cnonred) {
-        if (bitlistsequiv(bl[k],bl[cactive])) red=1;
+        if (bitlistsequiv(bl[k],bl[cactive])) {
+	  red=1;
+	  break;
+	}
         k++;
       }
       if (!red) {
@@ -153,7 +159,10 @@ void newtermstates(NormalForm * NFsOld, bitlist * blNew, int numtermOld, int len
     /* check whether normal form is in existing list */
     old=0; k=0; 
     while (!old && k<numtermOld){ 
-      if (NFsequal(NFsOld[k],NF)) old=1;
+      if (NFsequal(NFsOld[k],NF)) {
+        old=1;
+	break;
+      }
       k++;
     }
     
