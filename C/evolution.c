@@ -198,65 +198,84 @@ bitlist * searchenv(int numrun, int numgen, int popsize, int meth, int numcuts,
   nterm=0;
   for(crun=0; crun<numrun; crun++){
   
-  /* evolve random population */
-  evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
+    /* evolve random population */
+    evol=evolvepop(randompop(popsize),numgen,meth,numcuts,keepfitest,mutrate,alpha,0);
       
-  /* extract terminal states and remove redundancy */
-  bl=termstatesred(evol,numgen,&n1);
+    /* extract terminal states and remove redundancy */
+    bl=termstatesred(evol,numgen,&n1);
       
-  /* allocate memory for terminal states and normal forms */
-  if(crun==0) {
-    nterm=n1;
-    blterm=calloc(nterm,sizeof(bitlist));
-    NFs=calloc(nterm,sizeof(NormalForm));
-  }
-  else{
-    /* select new terminal states */
-    newtermstates(NFs,bl,nterm,n1,&n2);
-    nterm=nterm+n2;
+    if(crun==0){
+      /* allocate memory for terminal states and normal forms */
+      nterm=n1;
+      blterm=calloc(n1,sizeof(bitlist));
+      NFs=calloc(n1,sizeof(NormalForm));
+      
+      /* fill in lists */
+      for (i=0; i<n1; i++){
+          blterm[i]=bl[i];
+          NFs[i]=normalform(bl[i]);
+        } 
+      
+      /* monitor */
+      if (monitor) {
+        printf("   Run     #Term     #AllTerm\n");
+        printf("%6i    %6i    %6i\n",crun,n1,nterm);
+        fflush(stdout);
+      }
+      
+      /* print number of terminal states to file */
+      fprintf(fp1,"%d %d\n",n1,nterm);
+      fflush(fp1);
   
-    /* re-allocate memory for terminal states and normal forms */
-    if(n2!=0){
-      bltermOld=calloc(nterm-n2,sizeof(bitlist));
-      NFsOld=calloc(nterm-n2,sizeof(NormalForm));
-      for (i=0; i<nterm-n2; i++){
-        bltermOld[i]=blterm[i];
-        NFsOld[i]=NFs[i];
-      } 
-      free(blterm);free(NFs);
-      blterm=calloc(nterm,sizeof(bitlist));
-      NFs=calloc(nterm,sizeof(NormalForm));
-      for (i=0; i<nterm-n2; i++){
-        blterm[i]=bltermOld[i];
-        NFs[i]=NFsOld[i];
-      } 
-      free(bltermOld);free(NFsOld);
+      /* print terminal states to file */
+      for (i=0; i<n1; i++) fprintbitlist(fp2, bl[i]); 
     }
-  }
-    
-  /* load in new terminal states and normal forms */
-  for (i=0; i<n2; i++){
-    blterm[nterm-n2+i]=bl[i];
-    NFs[nterm-n2+i]=normalform(bl[i]);
-  } 
+    else{
+      /* select new terminal states */
+      newtermstates(NFs,blterm,nterm,n1,&n2);
+      nterm=nterm+n2;
   
-  /* monitor */
-  if (monitor) {
-    if (!(crun%10)) printf("   Run     #Term     #AllTerm\n");
-    printf("%6i    %6i    %6i\n",crun,n1,nterm);
-    fflush(stdout);
-  }
+      if(n2!=0){
+        /* re-allocate memory for terminal states and normal forms */
+        bltermOld=calloc(nterm-n2,sizeof(bitlist));
+        NFsOld=calloc(nterm-n2,sizeof(NormalForm));
+        for (i=0; i<nterm-n2; i++){
+          bltermOld[i]=blterm[i];
+          NFsOld[i]=NFs[i];
+        } 
+        free(blterm);free(NFs);
+        blterm=calloc(nterm,sizeof(bitlist));
+        NFs=calloc(nterm,sizeof(NormalForm));
+        
+        /* fill in lists */
+        for (i=0; i<nterm-n2; i++){
+          blterm[i]=bltermOld[i];
+          NFs[i]=NFsOld[i];
+        } 
+        free(bltermOld);free(NFsOld);
+        for (i=0; i<n2; i++){
+          blterm[nterm-n2+i]=bl[i];
+          NFs[nterm-n2+i]=normalform(bl[i]);
+        } 
+      }
+      
+      /* monitor */
+      if (monitor) {
+        if (!(crun%10)) printf("   Run     #Term     #AllTerm\n");
+        printf("%6i    %6i    %6i\n",crun,n1,nterm);
+        fflush(stdout);
+      }  
+      
+      /* print number of terminal states to file */
+      fprintf(fp1,"%d %d\n",n1,nterm);
+      fflush(fp1);
   
-  /* print number of terminal states to file */
-  fprintf(fp1,"%d %d\n",n1,nterm);
-  fflush(fp1);
-  
-  /* print terminal states to file */
-  for (i=0; i<n2; i++) fprintbitlist(fp2, bl[i]); 
+      /* print terminal states to file */
+      for (i=0; i<n2; i++) fprintbitlist(fp2, bl[i]); 
+    }
 
-  /* free allocated memory */ 
-  free(bl);free(evol);
-
+    /* free allocated memory */ 
+    free(bl);free(evol);
   }
   
   /* close files */
