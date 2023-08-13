@@ -38,5 +38,5 @@ evol = evolvepop(random_pop)
 bl1 = termstatesred(evol)
 
 # run a search for 10 populations
-bl2 = searchenv(10, 1)
+bl2 = searchenv(10)
 
