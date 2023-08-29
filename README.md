@@ -8,6 +8,8 @@ Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, An
 
 If you experience any issues, please email elli.heyes@city.ac.uk.
 
+* Python interface coming soon.
+
 # C Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
@@ -16,13 +18,6 @@ To install this package and use it on your own machine follow these simple steps
 - Step 3: From the command line move to the file directory and then inside the C folder. 
 - Step 4: Type 'make' and hit Enter. This should compile all the necessary files in the package.
 - Step 5: To run the main function within the gen_poly.c file simply type "./gen_poly.x" and hit Enter. 
-
-# Python Installation:
-- Step 0: Complete Steps 0-2 from the "C Installation" instructions above.
-- Step 1: In python set the file directory to the location of the Python folder. 
-- Step 2: Define the path to the directory on line 7 of poly_genetic.py file.
-- Step 3: Install the functions from poly_genetic by inputting "from poly_genetic import *" at the top of the file.
-- Step 4: You may now call any function that is defined within the poly_genetic.py file.
 
 # General Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
