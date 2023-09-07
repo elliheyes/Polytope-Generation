@@ -312,43 +312,36 @@ NormalForm normalform(bitlist bl)
 /* decide if two bistlist are identical */
 int bitlistsequal(bitlist bl1, bitlist bl2)
 {
-  int i, equal;
+  int i;
   
+  /* check if the bitlist lengths match */
   if (bl1.len != bl2.len) return 0;
-  else {
-    equal=1; i=0;
-    while (equal && i<bl1.len) {
-      equal = equal && (bl1.bits[i]==bl2.bits[i]);
-      i++;
-    }
-    return equal;
-  } 
+
+  /* compare the bitlists */
+  for(i=0; i<bl1.len; i++){
+    if (bl1.bits[i]!=bl2.bits[i]) return 0; 
+  }
+  return 1;
 }
 
 
 /* decide if two normal forms are equal */
 int NFsequal(NormalForm NF1, NormalForm NF2)
 {
-  int i, j, equal;
+  int i, j;
   
   /* check if the number of vertices match */
   if (NF1.nv != NF2.nv) return 0;
   
-  /* if number of vertices match, compare the normal form matrices */
-  else{
-    equal=1; 
-    for(i=0; i<POLYDIM; i++){
-      for(j=0; j<NF1.nv; j++){
-        if (NF1.x[i][j]!=NF2.x[i][j]){
-          equal = 0;
-          break;
-        } 
-      }
-      if (!equal) break;
+  /* compare the normal form matrices */
+  for(i=0; i<POLYDIM; i++){
+    for(j=0; j<NF1.nv; j++){
+      if (NF1.x[i][j]!=NF2.x[i][j]) return 0; 
     }
-    return equal;
   }
+  return 1;
 }
+
 
 
 /* decide if two bistlist are equivalent by comparing their normal forms */
