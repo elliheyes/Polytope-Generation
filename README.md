@@ -8,8 +8,6 @@ Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, An
 
 If you experience any issues, please email elli.heyes@city.ac.uk.
 
-* Python interface coming soon.
-
 # C Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
@@ -19,7 +17,7 @@ To install this package and use it on your own machine follow these simple steps
 - Step 4: Type 'make' and hit Enter. This should compile all the necessary files in the package.
 - Step 5: To run the main function within the gen_poly.c file simply type "./gen_poly.x" and hit Enter. 
 
-# General Notes:
+# C Code Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
   extract the terminal states (i.e. reflexive polytopes), remove redundancy in the list by computing 
   the normal form, and repeat this several times. The reduced list of output reflexive polytopes are written 
@@ -63,4 +61,5 @@ parameters in Global.h if using C or in the poly_genetic.py file if using Python
     of a given hodge number. Similarly for H12_WEIGHT, H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
 
     
-
+# Python Code Notes:
+To use this code one must have CYTools installed. If you do not have CYTools installed, do this first by following the installation instructions on the website: https://cy.tools.
