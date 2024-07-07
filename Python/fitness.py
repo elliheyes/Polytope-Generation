@@ -13,8 +13,14 @@ def lattice_dists(poly):
 
 def fitness(points, h11=None, h12=None, h13=None, h22=None, chi=None, fav=False):
     w1 = w2 = w3 = w4 = w5 = w6 = w7 = w8 = 1
+
+    # delete duplicate points 
+    points_red = []
+    for point in points:
+        if not point in points_red:
+            points_red.append(point)
     
-    poly = Polytope(points)
+    poly = Polytope(points_red)
     
     term1 = w1 * (IP(poly) - 1)
     term2 = - w2 * np.sum(np.abs(d:=lattice_dists(poly) - 1)) / len(d)
