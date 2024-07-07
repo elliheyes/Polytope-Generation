@@ -12,7 +12,7 @@ class state:
          .points is the points matrix of the polytope
          .dim is the dimension of the polytope
          .max_coeff is the absolute maximum coefficient value
-         .fitness is the fitness of the triangulation
+         .fitness is the fitness of the state
          .terminal is 1 if the state is good and 0 otherwise"""
     def __init__(self, points, dim, max_coeff):
         self.points = points
