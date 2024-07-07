@@ -195,7 +195,13 @@ def term_states(pop):
     states = [] 
     for i in range(pop.pop_size):
         if pop.state_list[i].terminal == 1:   
-            P = Polytope(pop.state_list[i].points)
+            # delete duplicate points
+            points_red = []
+            for point in pop.state_list[i].points:
+                if not point in points_red:
+                    points_red.append(point)
+            
+            P = Polytope(points_red)
             states.append(P)
     return states
 
