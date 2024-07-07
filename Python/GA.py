@@ -135,7 +135,8 @@ def random_state(dim, max_verts, max_coeff, h11=None, h12=None, h13=None, h22=No
         point = []
         for j in range(dim):
             point.append(random.choice(range(-max_coeff,max_coeff)))
-        points.append(point)
+        if not point in points:
+            points.append(point)
         
     S = state(points=points, dim=dim, max_coeff=max_coeff)
     S.compute_fitness(h11=h11, h12=h12, h13=h13, h22=h22, chi=chi, fav=fav)
