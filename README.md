@@ -1,14 +1,15 @@
 # Reflexive Polytope Generation
 
-This package is designed to generate reflexive polytopes of a certain type using a genetic algorithm. 
-
-https://arxiv.org/pdf/2306.06159.pdf
+This package is designed to generate reflexive polytopes using a genetic algorithm. By adjusting the weights in 
+the fitness function one can also tune the search to generate reflexive polytopes that give rise to Calabi-Yau 
+varieties with a given Hodge number. Datasets of 5d reflexive polytopes with small numbers of points found using 
+this package are provided in the Data file. Results are published here : https://arxiv.org/pdf/2306.06159.pdf.
+Original code is written in C, but in order to be more accessible we have also created a Python version which uses
+CYTools. For CYTools installation instructions please visit https://cy.tools.
 
 Authors: Per Berglund, Yang-Hui He, Elli Heyes, Edward Hirst, Vishnu Jejjala, Andre Lukas
 
-If you experience any issues, please email elli.heyes@city.ac.uk.
-
-# C Installation:
+## C Package Installation:
 To install this package and use it on your own machine follow these simple steps:
 - Step 0: If you do not have a C compiller and/or CMake installed on your machine start by downloading these.
 - Step 1: Download the zipped file for this package from GitHub.
@@ -17,7 +18,7 @@ To install this package and use it on your own machine follow these simple steps
 - Step 4: Type 'make' and hit Enter. This should compile all the necessary files in the package.
 - Step 5: To run the main function within the gen_poly.c file simply type "./gen_poly.x" and hit Enter. 
 
-# C Code Notes:
+## C Package Notes:
 - Currently the main function in gen_poly.c is set to randomly initialise a population, evolve it, 
   extract the terminal states (i.e. reflexive polytopes), remove redundancy in the list by computing 
   the normal form, and repeat this several times. The reduced list of output reflexive polytopes are written 
@@ -35,14 +36,14 @@ To install this package and use it on your own machine follow these simple steps
   
 - The content in the files bitlist.c, evolution.c and population.c have been copied from https://github.com/harveyThomas4692/GA-C.
 
-# Fitness
+## Fitness
 
-There are several components of the fitness function that can be turned
-on or off by the weight parameters. The two main components which should always remain on are the distance of 
-the facets from the origin and the IP property. Their associated weights are defined in Global.h as DIST_WEIGHT
-and IP_WEIGHT respectively. If DIST_WEIGHT > 0 then a penalty is added fitness for the average difference of the 
-distance of the facets from the origin and 1. If IP_WEIGHT > 0 then a penalty is added to the fitness if the polytope
-does not satisfy the interior point property.
+There are several components of the fitness function that can be turned on or off by the weight parameters. 
+The two main components which should always remain on are the distance of the facets from the origin and the 
+IP property. Their associated weights are defined in Global.h as DIST_WEIGHT and IP_WEIGHT respectively. 
+If DIST_WEIGHT > 0 then a penalty is added fitness for the average difference of the distance of the facets 
+from the origin and 1. If IP_WEIGHT > 0 then a penalty is added to the fitness if the polytope does not 
+satisfy the interior point property.
 
 On top of these two main components there are additional components one can include in the fitness to direct the 
 search for reflexive polytopes with specific properties. To turn on these additional components, amend the global
@@ -59,7 +60,3 @@ parameters in Global.h if using C or in the poly_genetic.py file if using Python
 -   H11_WEIGHT: if this is > 0 then a penalty is added to the fitness if the polytope does
     not have a h11 hodge number equal to H11. This causes the genetic algorithm to generate polytopes 
     of a given hodge number. Similarly for H12_WEIGHT, H13_WEIGHT, H22_WEIGHT, EULER_WEIGHT.
-
-    
-# Python Code Notes:
-To use this code one must have CYTools installed. If you do not have CYTools installed, do this first by following the installation instructions on the website: https://cy.tools.
